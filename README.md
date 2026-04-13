@@ -4,4 +4,6 @@ A professional-grade, modular Python application that serves as a secure reposit
 Additional Features
 1. GUI with Tkinter
 2. Data Visualization with matplotlib
-3. 2 Factor Authentication
+3. SQL serverless database
+4. 2 Factor Authentication
+5. Salting
