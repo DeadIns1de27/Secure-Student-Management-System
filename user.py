@@ -23,6 +23,7 @@ class User:
 #List to store student temp
 student_list = []
 
+
 #Admin class
 class Admin(User):
     #Add a new student to the list
