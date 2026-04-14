@@ -3,8 +3,10 @@ user.py layer
 
 Will include the user class.
 - Defines emails and hash passwords
+
 Will include the Admin class.
 - Defines access to add, edit, and delete a user
+
 Will include the StudentUser class.
 - Defines a student to VIEW only access to their record
 
@@ -22,6 +24,7 @@ class User:
 
 #List to store student temp
 student_list = []
+
 
 
 #Admin class
