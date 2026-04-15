@@ -12,12 +12,13 @@ perform calculations like calculate_average.
 class StudentRecord():
 
     #Initilizer
-    def __init__(self, studentID: int, name: str, age: int, gender: str, phoneNumber: str):
+    def __init__(self, studentID: int, name: str, age: int, gender: str, phoneNumber: str, grade: int):
         self.studentID = studentID
         self.name = name
         self.age = age
         self.gender = gender
         self.phoneNumber = phoneNumber
+        self.grade = grade
 
 #Gradmanger class
 class GradeManager():
