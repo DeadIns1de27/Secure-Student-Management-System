@@ -14,6 +14,7 @@ Will include the StudentUser class.
 
 #import StudentRecord
 from student import StudentRecord
+from data_handler import save_student
 
 #User class
 class User:
@@ -22,8 +23,6 @@ class User:
         self.email = email
         self.hash_password = hash_password
 
-#List to store student temp
-student_list = []
 
 
 
@@ -32,7 +31,7 @@ class Admin(User):
     #Add a new student to the list
     def add_student(self, studentID: int, name: str, age: int, gender: str, phoneNumber: str):
         new_student = StudentRecord(studentID, name, age, gender, phoneNumber)
-        student_list.append(new_student) #Add the new student to the student_list
+        save_student(new_student)
         return "New student added"
 
     #Edit student information
