@@ -3,18 +3,20 @@ Storage Layer:
 
 sqlalchemy used to store data objects in 
 a serverless data base (sqlite) titled database.db
-
--add load record function
--add update record function
--add delete record function
 '''
 
 #Import sqlalchemy
 import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.exc import IntegrityError
 
 #Import Data Layer
 from student import StudentRecord
+
+#Sets databases file location
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database.db")
 
 #Creates database class
 Base = declarative_base()
@@ -43,16 +45,102 @@ class StudentTable(Base):
 Base.metadata.create_all(engine)
 
 #Saves student records to database
-def save_student(record):
+def save_student(record) -> None:
     session = Session()
 
-    studentRow = StudentTable(studentID = record.studentID,
-                              name = record.name,
-                              age = record.age,
-                              gender = record.gender,
-                              phone = record.phoneNumber)
+    try:
+        studentRow = StudentTable(studentID = record.studentID,
+                                name = record.name,
+                                age = record.age,
+                                gender = record.gender,
+                                phone = record.phoneNumber,
+                                grade = record.grade)
     
-    #Adds and commits new row to database
-    session.add(studentRow)
-    session.commit()
-    session.close()
+        #Adds and commits new row to database
+        session.add(studentRow)
+        session.commit()
+
+    #Raises exeception if student id already in use
+    except IntegrityError:
+        session.rollback()
+        raise ValueError(f"Student ID {record.studentID} already in use.")
+
+    finally:
+        session.close()
+
+#Loads student record from data base using studentID
+def load_student(student_id: int) -> dict | None:
+    session = Session()
+
+    try:
+        #Finds the student record with specified studentID
+        student = sa.select(StudentTable).where(StudentTable.studentID == student_id)
+        row = session.execute(student).scalar_one_or_none()
+
+        if row is None:
+            return None
+    
+        #Returns specified student record
+        return {c.name: getattr(row, c.name) for c in row.__table__.columns}
+
+    finally:
+        session.close()
+
+#Update student record
+def update_student(student_id, **updates):
+    session = Session()
+
+    try:
+        #Finds the student record with specified studentID    
+        student = sa.select(StudentTable).where(StudentTable.studentID == student_id)
+        row = session.execute(student).scalar_one_or_none()
+
+        #Checks if row is empty
+        if row is None:
+            return {"succes": False, "error": "Student not found"}
+        
+        #all valid fields in the table
+        validFields = StudentTable.__table__.columns.keys()
+
+        #interate through specifeid row
+        for key, value in updates.items():
+            #Checks if key is a valid field
+            if key not in validFields:
+                return {"success": False, "error": f"Invalid field: {key}"}
+            #Updates specifeid values
+            setattr(row, key, value)
+            
+        session.commit()
+        return {"success": True, "message": "Student updated successfully"}
+    
+    except Exception as e:
+        session.rollback()
+        return {"success": False, "error": str(e)}
+    
+    finally:
+        session.close()
+
+#Delete a row from database
+def delete_student(student_id):
+    session = Session()
+
+    #Finds the student record with specified studentID    
+    try:
+        student = sa.select(StudentTable).where(StudentTable.studentID == student_id)
+        row = session.execute(student).scalar_one_or_none()
+
+        #Checks if student exists
+        if row is None:
+            return {"succes": False, "error": "Student not found"}
+        
+        #deletes specified row
+        session.delete(student)
+        session.commit()
+        return {"success": True, "message": "Student deleted successfully"}
+    
+    except Exception as e:
+        session.rollback()
+        return {"success": False, "error": str(e)}
+    
+    finally:
+        session.close()
