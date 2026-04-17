@@ -6,6 +6,7 @@ Will include the user class.
 
 Will include the Admin class.
 - Defines access to add, edit, and delete a user
+- Allow for the user to view student records
 
 Will include the StudentUser class.
 - Defines a student to VIEW only access to their record
@@ -14,7 +15,7 @@ Will include the StudentUser class.
 
 #import StudentRecord
 from student import StudentRecord
-from data_handler import save_student
+from data_handler import save_student, delete_student, load_student, update_student
 
 #User class
 class User:
@@ -22,8 +23,6 @@ class User:
     def __init__(self, email, hash_password):
         self.email = email
         self.hash_password = hash_password
-
-
 
 
 #Admin class
@@ -36,47 +35,41 @@ class Admin(User):
 
     #Edit student information
     def edit_student(self, studentID, name=None, age=None, gender=None, phoneNumber=None):
-
-        #for loop to go through students
-        for student in student_list:
-
-            #Checks to find the right student with studentID
-            if student.studentID == studentID:
-                if name is not None:
-                    student.name = name
-                if age is not None:
-                    student.age = age
-                if gender is not None:
-                    student.gender = gender
-                if phoneNumber is not None:
-                    student.phoneNumber = phoneNumber
-                return "student edited"
-        return "Student not found"
+        #Update the student
+        return update_student(
+            studentID,
+            name=name,
+            age=age,
+            gender=gender,
+            phone=phoneNumber
+        )
 
     #Delete student and information
-    def delete_student(self,studentID):
+    def delete_student_record(self,studentID):
 
-        #Loop through students
-        for student in student_list:
-            if student.studentID == studentID:
-                student_list.remove(student) #Remove the student from the list
-                return "student deleted"
-        return "Student not found"
+        #Check for student
+        student = load_student(studentID)
 
+        #Make sure the student is valid
+        if student is None:
+              return "Student not found"
+
+        #Delete the student if found
+        return delete_student(studentID)
 
 
 #StudentUser class
 class StudentUser(User):
     #Create the view_student_record
     def view_student_record(self, studentID):
+        #Find the student record
+        student = load_student(studentID)
 
-        #loop through the list
-        for student in student_list:
-            #find the correct matching studentID
-            if student.studentID == studentID:
-                #Return the student object
-                return student
-        return "Student not found"
+        #Makes sure student is valid
+        if student is None:
+            return "Student not found"
+        #Returns the student
+        return student
 
 
 
