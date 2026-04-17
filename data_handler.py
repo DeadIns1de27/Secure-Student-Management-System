@@ -3,11 +3,6 @@ Storage Layer:
 
 sqlalchemy used to store data objects in 
 a serverless data base (sqlite) titled database.db
-
--add save_password
--add load_password
--add update_password
--add admin column to studentTable
 '''
 
 #Import sqlalchemy
@@ -48,6 +43,7 @@ class StudentTable(Base):
     gender = sa.Column(sa.String)
     phone = sa.Column(sa.String)
     grade = sa.Column(sa.Text)
+    adminStatus = sa.Column(sa.Boolean)
 
 #Stores studentID and hased password
 class StudentCredentials(Base):
