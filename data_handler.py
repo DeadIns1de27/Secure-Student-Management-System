@@ -246,3 +246,12 @@ def delete_password_row(student_id):
     
     finally:
         session.close()
+
+def gradesToTuple():
+
+    session = Session()
+
+    statement = sa.select(StudentTable.grade)
+    column = session.execute(statement).all()
+
+    return column
