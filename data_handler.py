@@ -24,6 +24,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
 
+#Imports numpy
+import numpy as np
+
 #Creates database class
 Base = declarative_base()
 
@@ -282,11 +285,19 @@ def validate_login(student_id, input_password) -> str:
     finally:
         session.close()
 
-def gradesToTuple():
+def getGradesArray():
 
     session = Session()
 
     statement = sa.select(StudentTable.grade)
-    column = session.execute(statement).all()
+    rows = session.execute(statement).all()
 
-    return column
+    grade_lists = []
+
+    for (grade_str,) in rows:
+        grades = [int(x) for x in grade_str.split(",")]
+        grade_lists.append(grades)
+
+    arr = np.array(grade_lists)
+
+    return arr
