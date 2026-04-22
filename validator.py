@@ -38,7 +38,12 @@ def validate_password(password: str) -> bool:
     pattern = r'^[!@#$%^&*][A-Za-z0-9!@#$%^&*]{5,11}$'
     return bool(re.fullmatch(pattern, password))
 
+#Validate student id
+def validate_id(studentID: str) -> bool:
 
+    #studentID must start with 700 and end with exactly 6 digits
+    pattern = r'^700\d{6}$'
+    return bool(re.fullmatch(pattern, studentID))
 
 #Example / Test Case, only works when executed directly
 if __name__ == "__main__":
