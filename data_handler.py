@@ -48,6 +48,7 @@ class StudentTable(Base):
     age = sa.Column(sa.Integer)
     gender = sa.Column(sa.String)
     phone = sa.Column(sa.String)
+    email = sa.Column(sa.String)
     grade = sa.Column(sa.Text)
     adminStatus = sa.Column(sa.Boolean)
 
@@ -76,7 +77,9 @@ def save_student(record) -> None:
                                 age = record.age,
                                 gender = record.gender,
                                 phone = record.phoneNumber,
-                                grade = record.grade)
+                                email = record.email,
+                                grade = record.grade,
+                                adminStatus = record.adminStatus)
     
         #Adds and commits new row to database
         session.add(studentRow)
@@ -86,6 +89,24 @@ def save_student(record) -> None:
     except IntegrityError:
         session.rollback()
         raise ValueError(f"Student ID {record.studentID} already in use.")
+
+    finally:
+        session.close()
+
+#Loads student record from data base using studentID
+def load_student_grade(student_id: int) -> int | None:
+    session = Session()
+
+    try:
+        #Finds the student record with specified studentID
+        student = sa.select(StudentTable.grade).where(StudentTable.studentID == student_id)
+        row = session.execute(student).scalar_one_or_none()
+
+        if row is None:
+            return None
+    
+        #Returns specified student record
+        return row
 
     finally:
         session.close()
