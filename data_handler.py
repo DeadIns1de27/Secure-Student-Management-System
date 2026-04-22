@@ -10,6 +10,9 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import IntegrityError
 
+#Import password hash verification
+from security import verify_password
+
 #Import Data Layer
 from student import StudentRecord
 
@@ -20,6 +23,9 @@ from security import hash_password
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "database.db")
+
+#Imports numpy
+import numpy as np
 
 #Creates database class
 Base = declarative_base()
@@ -247,11 +253,51 @@ def delete_password_row(student_id):
     finally:
         session.close()
 
-def gradesToTuple():
+#checks the user password and also their status(admin / student)
+def validate_login(student_id, input_password) -> str:
+    session = Session()
+
+    try:
+        #loads user password associated with id
+        password = load_password(student_id)
+
+        #check if theres a password
+        if not password:
+            return None
+        
+        #check if the input password matches the stores password
+        if not verify_password(password, input_password):
+            return None
+        
+        #get the adminstatus of the id from the database
+        query = sa.select(StudentTable.adminStatus).where(StudentTable.studentID == student_id)
+        adminStatus = session.execute(query).scalar_one_or_none()
+
+        #check if user is admin or student
+        if adminStatus:
+            return "Admin"
+        return "Student"
+
+    except Exception as e:
+        session.rollback()
+        return None
+
+    finally:
+        session.close()
+
+def getGradesArray():
 
     session = Session()
 
     statement = sa.select(StudentTable.grade)
-    column = session.execute(statement).all()
+    rows = session.execute(statement).all()
 
-    return column
+    grade_lists = []
+
+    for (grade_str,) in rows:
+        grades = [int(x) for x in grade_str.split(",")]
+        grade_lists.append(grades)
+
+    arr = np.array(grade_lists)
+
+    return arr
