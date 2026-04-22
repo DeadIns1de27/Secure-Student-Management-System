@@ -5,7 +5,8 @@ It will count the number of login attempts and increment after each failed attem
 If the correct email and password are input, return true.
 After three failed attempts, return false.
 '''
-from security import verify_password
+#from security import verify_password
+from data_handler import validate_login
 
 class SessionManager():
     def __init__(self):
@@ -19,17 +20,16 @@ class SessionManager():
         #loop through as long as the max attempts haven't been reached
         while login_attempts < max_attempts:
 
-            #prompt user for email and password
-            input_email = input("Enter email: ")
+            #prompt user for ID and password
+            input_id = input("Enter ID: ")
             input_password = input("Enter password: ")
 
-            #check for valid email and password
-            #currently verify_email is not done so it is a placeholder for now
-            if verify_email(user.email, input_email) and verify_password(user.password, input_password):
-               print("Correct email and password")
+            #check for valid studentID and password
+            if validate_login(input_id, input_password):
+               print("Login Successful")
                return True
             else:
-                print("Incorrect email or password")
+                print("Incorrect ID or password")
                 login_attempts += 1
 
         print("Too many incorrect login attempts")
