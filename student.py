@@ -8,16 +8,30 @@ GradeManager: Dedicated module to handle 2D lists of grades and
 perform calculations like calculate_average.
 '''
 
+from data_handler import load_student
+from random import randint
+
 #StudentRecord class
 class StudentRecord():
 
     #Initilizer
-    def __init__(self, studentID: int, name: str, age: int, gender: str, phoneNumber: str, email: str, grade: int, adminStatus: bool):
+    def __init__(self, studentID: int, name: str, age: int, gender: str, phoneNumber: str, email: str):
         self.studentID = studentID
         self.name = name
         self.age = age
         self.gender = gender
         self.phoneNumber = phoneNumber
         self.email = email
-        self.grade = grade
-        self.adminStatus = adminStatus
+        self.grade = "N/A"
+        self.adminStatus = False
+
+    #Generates a unique id that isnt registered in the database
+    def studentID_generator(self):
+        
+        while True:
+            number = randint(0, 999999)
+
+            self.studentID = f"700{number:06d}"
+
+            if load_student(self.studentID) is None:
+                return self.studentID
