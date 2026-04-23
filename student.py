@@ -8,7 +8,6 @@ GradeManager: Dedicated module to handle 2D lists of grades and
 perform calculations like calculate_average.
 '''
 
-from data_handler import load_student
 from random import randint
 
 #StudentRecord class
@@ -28,6 +27,9 @@ class StudentRecord():
     #Generates a unique id that isnt registered in the database
     def studentID_generator(self):
         
+        #Import load student in this call
+        from data_handler import load_student
+
         while True:
             number = randint(0, 999999)
 
