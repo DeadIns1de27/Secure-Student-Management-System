@@ -1,0 +1,282 @@
+"""
+Description:
+File dedicated to handling Graphical Interface
+Should Include:
+1. Windows / frames / layouts
+2. Buttons, labels, entry fields
+3. Event handlers (button clicks)
+"""
+
+import tkinter as tk
+from tkinter import ttk
+from data_handler import validate_login, save_student
+import validator as v
+import student
+
+#Font and size for titles
+LARGEFONT =("Times New Roman", 35)
+
+#Main app class: controls each frame displayed
+class AppGui(tk.Tk):
+
+    #Initialize the gui
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.title("Secure Student Management System")  #App window title
+
+        self.geometry("800x600")    #App window size
+
+        #Create a container to store the different frames being displayed
+        container = tk.Frame(self)
+        container.pack(side= 'top', fill= 'both', expand= True)
+
+        container.grid_rowconfigure(0, weight = 1)
+        container.grid_columnconfigure(0, weight = 1)
+
+        self.frames = {}
+
+        #create each frame and store
+        #Note: Add new frame class into this
+        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame):
+ 
+            frame = F(container, self)
+ 
+            # initializing frame of that object for each page with for loop
+            self.frames[F] = frame 
+ 
+            frame.grid(row = 0, column = 0, sticky ="nsew")
+ 
+        self.show_frame(LoginFrame)     #Default frame is login
+ 
+    # to display the current frame passed as parameter
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
+        
+#Main Base frame for all frames for tidier grid 
+class BaseFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+
+        self.controller = controller
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.form = tk.Frame(self)
+        self.form.grid(row=0, column=0)
+
+    #check if the chracter is a digit, if not chracter becomes empty
+    def only_digits(self, value):
+        return value.isdigit() or value == ""
+    
+    #check if the chracter being entered into entry box is digit
+    def digit_validator(self):
+        return (self.register(self.only_digits), "%P")
+
+#Login Frame
+class LoginFrame(BaseFrame):
+    def __init__(self, parent, controller): 
+        super().__init__(parent, controller)
+
+        # label of title
+        tk.Label(self.form, text ="Login", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
+        
+        # Label and entry box for student id
+        tk.Label(self.form, text="Student ID").grid(row= 2, column= 4)
+        self.studentID = tk.Entry(self.form, validate="key", validatecommand=self.digit_validator())
+        self.studentID.grid(row= 3, column= 4)
+
+        # Label and entry box for password
+        tk.Label(self.form, text="Password").grid(row= 5, column= 4)
+        self.password = tk.Entry(self.form, show= "*")
+        self.password.grid(row= 6, column= 4)
+
+        #Button to confirm login
+        tk.Button(self.form, text="Login", command= self.login).grid(row= 7, column= 4, pady= 10)
+
+        #Button to register a new account
+        tk.Button(self.form, text="Register Account", command= lambda: self.controller.show_frame(RegisterFrame)).grid(row= 8, column= 4, pady= 5)
+
+    #Function to check the login status
+    def login(self):
+        
+        #Get student id and password from entry box
+        studentID = self.studentID.get()
+        password = self.password.get()
+
+        #Validate format for studentid and password
+        if not v.validate_id(studentID):
+            print("Invalid Student ID")
+            return 
+        
+        if not v.validate_password(password):
+            print("Invalid Password")
+            return
+        
+        #Run validate login to get the status (admin/student/failed login)
+        status = validate_login(studentID, password)
+
+        #If admin open admin page
+        if status == "Admin":
+            self.controller.show_frame(AdminFrame)
+
+        #if student open student page
+        elif status == "Student":
+            self.controller.show_frame(StudentFrame)
+
+        else:
+            print("Login Failed")
+
+#Register Frame
+class RegisterFrame(BaseFrame):
+    def __init__(self, parent, controller):
+
+        super().__init__(parent, controller)
+
+        #Label for title
+        tk.Label(self.form, text ="Register", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
+
+        #Label and entry for name
+        tk.Label(self.form, text="Name").grid(row= 2, column= 4)
+        self.name = tk.Entry(self.form)
+        self.name.grid(row= 3, column= 4)
+
+        #label and entry for age
+        tk.Label(self.form, text="Age").grid(row= 5, column= 4)
+        self.age = tk.Entry(self.form, validate="key", validatecommand= self.digit_validator())
+        self.age.grid(row= 6, column= 4)
+
+        #label and entry for gender
+        tk.Label(self.form, text="Gender").grid(row= 7, column= 4)
+        self.gender = tk.Entry(self.form)
+        self.gender.grid(row= 8, column= 4)
+
+        #label and entry for phone number
+        tk.Label(self.form, text="Phone Number").grid(row= 9, column= 4)
+        self.phone_number = tk.Entry(self.form)
+        self.phone_number.grid(row= 10, column= 4)
+
+        #label and entry for email
+        tk.Label(self.form, text="Email").grid(row= 11, column= 4)
+        self.email = tk.Entry(self.form)
+        self.email.grid(row= 12, column= 4)
+
+        #label and entry for password
+        tk.Label(self.form, text="Password").grid(row= 13, column= 4)
+        self.password = tk.Entry(self.form)
+        self.password.grid(row= 14, column= 4)
+
+        #label and entry for password confirmation
+        tk.Label(self.form, text="Confirm Password").grid(row= 15, column= 4)
+        self.confirmed = tk.Entry(self.form)
+        self.confirmed.grid(row= 16, column= 4)
+
+        #Button to register student info
+        tk.Button(self.form, text="Register Now", command= lambda: self.register_info()).grid(row= 17, column= 4, pady= 10)
+
+    #function ran when register button is pressed
+    def register_info(self):
+
+        #Check if the 2 password matches
+        if self.confirmed.get() != self.password.get():
+            return
+
+        #Check validation for name, email, phone, password
+        if not v.validate_name(self.name.get()):
+            return 
+        
+        if not v.validate_email(self.email.get()):
+            return
+        
+        if not v.validate_phone(self.phone_number.get()):
+            return
+        
+        if not v.validate_password(self.password.get()):
+            return
+
+        #store the student records
+        record = student.StudentRecord(
+            studentID= student.StudentRecord.studentID_generator(),
+            name= self.name.get(),
+            age= self.age.get(),
+            gender= self.gender.get(),
+            phoneNumber= self.phone_number.get(),
+            email= self.email.get(),
+        )
+        
+        #Try to save the studen records into the database and goes to student frame when succeeds
+        try:
+            save_student(record)
+
+            print("Account Created")
+            self.controller.show_frame(StudentFrame)
+
+        except ValueError as e:
+            print(e)        
+
+#!!!! Everything below is work in progress
+#I just copied a quick page layout from google
+#Remember to subclass with baseframe rather than tk.frame
+
+class AdminFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        
+        super().__init__(parent)
+        self.controller = controller
+
+        label = ttk.Label(self, text ="Admin Page", font = LARGEFONT)
+        label.grid(row = 0, column = 4, padx = 10, pady = 10)
+ 
+        # button to show frame 2 with text
+        # layout2
+        button1 = ttk.Button(self, text ="Login",
+                            command = lambda : controller.show_frame(LoginFrame))
+    
+        # putting the button in its place 
+        # by using grid
+        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
+ 
+        # button to show frame 2 with text
+        # layout2
+        button2 = ttk.Button(self, text ="Student Page",
+                            command = lambda : controller.show_frame(StudentFrame))
+    
+        # putting the button in its place by 
+        # using grid
+        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
+ 
+ 
+
+class StudentFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+
+        label = ttk.Label(self, text ="Student Page", font = LARGEFONT)
+        label.grid(row = 0, column = 4, padx = 10, pady = 10)
+ 
+        # button to show frame 2 with text
+        # layout2
+        button1 = ttk.Button(self, text ="Admin Page",
+                            command = lambda : controller.show_frame(AdminFrame))
+    
+        # putting the button in its place by 
+        # using grid
+        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
+ 
+        # button to show frame 3 with text
+        # layout3
+        button2 = ttk.Button(self, text ="Login",
+                            command = lambda : controller.show_frame(LoginFrame))
+    
+        # putting the button in its place by
+        # using grid
+        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
+
+
+#Create gui object
+app = AppGui()
+app.mainloop()
