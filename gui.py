@@ -73,6 +73,34 @@ class BaseFrame(tk.Frame):
     #check if the chracter being entered into entry box is digit
     def digit_validator(self):
         return (self.register(self.only_digits), "%P")
+    
+    #format the phone entry from xxxxxxxxxx to xxx-xxx-xxxx
+    def format_phone(self, value):
+    
+        # remove anything that isn't a digit
+        digits = "".join(filter(str.isdigit, value))
+
+        # limit to 10 digits
+        digits = digits[:10]
+
+        # format
+        if len(digits) <= 3:
+            return digits
+        elif len(digits) <= 6:
+            return f"{digits[:3]}-{digits[3:]}"
+        else:
+            return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
+        
+    #Event handler that
+    def on_phone_change(self, event):
+
+        value = self.phone_number.get()
+
+        formatted = self.format_phone(value)
+
+        self.phone_number.delete(0, "end")
+        self.phone_number.insert(0, formatted)
+
 
 #Login Frame
 class LoginFrame(BaseFrame):
@@ -157,7 +185,8 @@ class RegisterFrame(BaseFrame):
 
         #label and entry for phone number
         tk.Label(self.form, text="Phone Number").grid(row= 9, column= 4)
-        self.phone_number = tk.Entry(self.form)
+        self.phone_number = tk.Entry(self.form, validate="key", validatecommand= self.digit_validator)
+        self.phone_number.bind("<KeyRelease>", self.on_phone_change)
         self.phone_number.grid(row= 10, column= 4)
 
         #label and entry for email
