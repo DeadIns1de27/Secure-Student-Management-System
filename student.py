@@ -25,7 +25,8 @@ class StudentRecord():
         self.adminStatus = False
 
     #Generates a unique id that isnt registered in the database
-    def studentID_generator(self):
+    @staticmethod
+    def studentID_generator():
         
         #Import load student in this call
         from data_handler import load_student
@@ -33,7 +34,7 @@ class StudentRecord():
         while True:
             number = randint(0, 999999)
 
-            self.studentID = f"700{number:06d}"
+            studentID = f"700{number:06d}"
 
-            if load_student(self.studentID) is None:
-                return self.studentID
+            if load_student(studentID) is None:
+                return studentID
