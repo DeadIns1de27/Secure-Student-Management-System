@@ -105,8 +105,8 @@ class LoginFrame(BaseFrame):
         from data_handler import validate_login
 
         #Get student id and password from entry box
-        studentID = self.studentID.get()
-        password = self.password.get()
+        studentID = self.studentID.get().strip()
+        password = self.password.get().strip()
 
         #Validate format for studentid and password
         if not v.validate_id(studentID):
@@ -118,7 +118,7 @@ class LoginFrame(BaseFrame):
             return
         
         #Run validate login to get the status (admin/student/failed login)
-        status = validate_login(studentID, password)
+        status = validate_login(studentID.strip(), password.strip())
 
         #If admin open admin page
         if status == "Admin":
@@ -167,12 +167,12 @@ class RegisterFrame(BaseFrame):
 
         #label and entry for password
         tk.Label(self.form, text="Password").grid(row= 13, column= 4)
-        self.password = tk.Entry(self.form)
+        self.password = tk.Entry(self.form, show= "*")
         self.password.grid(row= 14, column= 4)
 
         #label and entry for password confirmation
         tk.Label(self.form, text="Confirm Password").grid(row= 15, column= 4)
-        self.confirmed = tk.Entry(self.form)
+        self.confirmed = tk.Entry(self.form, show= "*")
         self.confirmed.grid(row= 16, column= 4)
 
         #Button to register student info
@@ -187,36 +187,36 @@ class RegisterFrame(BaseFrame):
         from security import hash_password
 
         #Check if the 2 password matches
-        if self.confirmed.get() != self.password.get():
+        if self.confirmed.get().strip() != self.password.get().strip():
             return
 
         #Check validation for name, email, phone, password
-        if not v.validate_name(self.name.get()):
+        if not v.validate_name(self.name.get().strip()):
             return 
         
-        if not v.validate_email(self.email.get()):
+        if not v.validate_email(self.email.get().strip()):
             return
         
-        if not v.validate_phone(self.phone_number.get()):
+        if not v.validate_phone(self.phone_number.get().strip()):
             return
         
-        if not v.validate_password(self.password.get()):
+        if not v.validate_password(self.password.get().strip()):
             return
 
         #store the student records
         record = student.StudentRecord(
             studentID= student.StudentRecord.studentID_generator(),
-            name= self.name.get(),
-            age= self.age.get(),
-            gender= self.gender.get(),
-            phoneNumber= self.phone_number.get(),
-            email= self.email.get(),
+            name= self.name.get().strip(),
+            age= self.age.get().strip(),
+            gender= self.gender.get().strip(),
+            phoneNumber= self.phone_number.get().strip(),
+            email= self.email.get().strip(),
         )
         
         #Try to save the studen records and hashed password into the database and goes to student page when succeeds
         try:
             save_student(record)
-            save_password(hash_password(record.studentID))
+            save_password(record.studentID, hash_password(self.password.get().strip()))
             print("Account Created")
             self.controller.show_frame(StudentFrame)
 
