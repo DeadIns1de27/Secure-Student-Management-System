@@ -9,9 +9,7 @@ Should Include:
 
 import tkinter as tk
 from tkinter import ttk
-from data_handler import validate_login, save_student
 import validator as v
-import student
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -102,7 +100,10 @@ class LoginFrame(BaseFrame):
 
     #Function to check the login status
     def login(self):
-        
+
+        #import validate login only for this function call
+        from data_handler import validate_login
+
         #Get student id and password from entry box
         studentID = self.studentID.get()
         password = self.password.get()
@@ -180,6 +181,11 @@ class RegisterFrame(BaseFrame):
     #function ran when register button is pressed
     def register_info(self):
 
+        #Import functions used only in this function call
+        from data_handler import save_student, save_password
+        import student
+        from security import hash_password
+
         #Check if the 2 password matches
         if self.confirmed.get() != self.password.get():
             return
@@ -207,10 +213,10 @@ class RegisterFrame(BaseFrame):
             email= self.email.get(),
         )
         
-        #Try to save the studen records into the database and goes to student frame when succeeds
+        #Try to save the studen records and hashed password into the database and goes to student page when succeeds
         try:
             save_student(record)
-
+            save_password(hash_password(record.studentID))
             print("Account Created")
             self.controller.show_frame(StudentFrame)
 
