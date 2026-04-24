@@ -8,7 +8,6 @@ Should Include:
 """
 
 import tkinter as tk
-from tkinter import ttk
 import validator as v
 
 #Font and size for titles
@@ -46,7 +45,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(LoginFrame)     #Default frame is login
+        self.show_frame(AdminFrame)     #Default frame is login
  
     # to display the current frame passed as parameter
     def show_frame(self, cont):
@@ -256,60 +255,20 @@ class RegisterFrame(BaseFrame):
 #I just copied a quick page layout from google
 #Remember to subclass with baseframe rather than tk.frame
 
-class AdminFrame(tk.Frame):
+class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+
+        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
+ 
+
+class StudentFrame(BaseFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
         
-        super().__init__(parent)
-        self.controller = controller
 
-        label = ttk.Label(self, text ="Admin Page", font = LARGEFONT)
-        label.grid(row = 0, column = 4, padx = 10, pady = 10)
- 
-        # button to show frame 2 with text
-        # layout2
-        button1 = ttk.Button(self, text ="Login",
-                            command = lambda : controller.show_frame(LoginFrame))
-    
-        # putting the button in its place 
-        # by using grid
-        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
- 
-        # button to show frame 2 with text
-        # layout2
-        button2 = ttk.Button(self, text ="Student Page",
-                            command = lambda : controller.show_frame(StudentFrame))
-    
-        # putting the button in its place by 
-        # using grid
-        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
- 
- 
-
-class StudentFrame(tk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
-        self.controller = controller
-
-        label = ttk.Label(self, text ="Student Page", font = LARGEFONT)
-        label.grid(row = 0, column = 4, padx = 10, pady = 10)
- 
-        # button to show frame 2 with text
-        # layout2
-        button1 = ttk.Button(self, text ="Admin Page",
-                            command = lambda : controller.show_frame(AdminFrame))
-    
-        # putting the button in its place by 
-        # using grid
-        button1.grid(row = 1, column = 1, padx = 10, pady = 10)
- 
-        # button to show frame 3 with text
-        # layout3
-        button2 = ttk.Button(self, text ="Login",
-                            command = lambda : controller.show_frame(LoginFrame))
-    
-        # putting the button in its place by
-        # using grid
-        button2.grid(row = 2, column = 1, padx = 10, pady = 10)
 
 
 #Create gui object
