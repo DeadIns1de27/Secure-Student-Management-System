@@ -49,8 +49,10 @@ class StudentTable(Base):
     gender = sa.Column(sa.String)
     phone = sa.Column(sa.String)
     email = sa.Column(sa.String)
-    grade = sa.Column(sa.Text)
     adminStatus = sa.Column(sa.Boolean)
+    mathGrade = sa.Column(sa.Integer)
+    programmingGrade = sa.Column(sa.Integer)
+    scienceGrade = sa.Column(sa.Integer)
 
 #Stores studentID and hased password
 class StudentCredentials(Base):
@@ -78,8 +80,10 @@ def save_student(record) -> None:
                                 gender = record.gender,
                                 phone = record.phoneNumber,
                                 email = record.email,
-                                grade = record.grade,
-                                adminStatus = record.adminStatus)
+                                adminStatus = record.adminStatus,
+                                math = record.mathGrade,
+                                programming = record.programmingGrade,
+                                science = record.scienceGrade)
     
         #Adds and commits new row to database
         session.add(studentRow)

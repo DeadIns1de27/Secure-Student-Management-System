@@ -251,7 +251,7 @@ class RegisterFrame(BaseFrame):
             age= self.age.get().strip(),
             gender= self.gender.get().strip(),
             phoneNumber= self.phone_number.get().strip(),
-            email= self.email.get().strip(),
+            email= self.email.get().strip()
         )
         
         #Try to save the studen records and hashed password into the database and goes to student page when succeeds
@@ -282,6 +282,10 @@ class AdminFrame(BaseFrame):
         self.editButton.grid(row = 7, column = 1, pady = 10)
         self.editButton.grid_remove()
 
+        self.deleteButton = tk.Button(self.form, text = "Delete", command = self.deleteStudent)
+        self.deleteButton.grid(row = 3, column = 1, sticky = "w")
+        self.deleteButton.grid_remove()
+
         #Button to log out
         tk.Button(self.form, text="Log Out", command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
         
@@ -309,6 +313,7 @@ class AdminFrame(BaseFrame):
         self.currentData = student
 
         self.editButton.grid()
+        self.deleteButton.grid()
 
     def editStudent(self):
 
@@ -370,6 +375,16 @@ class AdminFrame(BaseFrame):
 
         self.editButton.config(text = "Edit", command = self.edit_entries)
 
+    def deleteStudent(self):
+
+        studentID = self.currentData["studentID"]
+
+        dh.delete_student(studentID)
+
+        #Clear frame
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
 #Student page
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
@@ -383,7 +398,8 @@ class StudentFrame(BaseFrame):
 
     def load_data(self):
     #Get the student record
-        self.record = self.get_current_student()    
+        self.record = self.get_current_student() 
+        print (self.record)  
         row = 1
 
         #Loop through all the records and display the label and the key
