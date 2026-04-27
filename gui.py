@@ -373,7 +373,7 @@ class AdminFrame(BaseFrame):
 
         self.displayStudent()
 
-        self.editButton.config(text = "Edit", command = self.edit_entries)
+        self.editButton.config(text = "Edit", command = self.editStudent)
 
     def deleteStudent(self):
 

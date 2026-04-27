@@ -81,9 +81,9 @@ def save_student(record) -> None:
                                 phone = record.phoneNumber,
                                 email = record.email,
                                 adminStatus = record.adminStatus,
-                                math = record.mathGrade,
-                                programming = record.programmingGrade,
-                                science = record.scienceGrade)
+                                mathGrade = record.mathGrade,
+                                programmingGrade = record.programmingGrade,
+                                scienceGrade = record.scienceGrade)
     
         #Adds and commits new row to database
         session.add(studentRow)
