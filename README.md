@@ -22,6 +22,8 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 
 
 
+
+
 ###### **Additional Features**
 
 1. GUI with Tkinter
@@ -32,18 +34,22 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 
 
 
+
+
 ###### **Installation / Requirements**
 
-* SQLAlchemy
+* sqlalchemy
 * numpy
 * pyotp
 * qrcode
 
 
 
+
+
 ###### **How to Run Application**
 
-To run this application, you must first download all the necessary requirements. This includes SQLAchemy, numpy, pyotp, and qrcode. To launch this application, run the gui.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Close the application by pressing the X in the top right corner. 
+To run this application, you must first download all the necessary requirements. This includes sqlalchemy, numpy, pyotp, and qrcode. To launch this application, run the gui.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Users can log out using the log out button. Close the application by pressing the X in the top right corner.
 
 
 
@@ -63,23 +69,25 @@ To run this application, you must first download all the necessary requirements.
 
 
 
+
+
 ##### **File Descriptions**
 
 ###### main.py
 
-* Entry point that controls program flow. 
+* Entry point that controls program flow.
 
 
 
 ###### session\_manager.py
 
-* This file tracks login attempts and increments after a failed attempt. After three failed attempts, the system will not allow the user to try again. 
+* This file tracks login attempts and increments after a failed attempt. After three failed attempts, the system will not allow the user to try again.
 
 
 
 ###### user.py
 
-* The User class will define core attributes such as email and hashed password. It will define user, admin, and StudentUser access as they inherit from the user class. Using data\_handler to save, edit, delete, and view student records. 
+* The User class will define core attributes such as email and hashed password. It will define user, admin, and StudentUser access as they inherit from the user class. Using data\_handler to save, edit, delete, and view student records.
 
 
 
@@ -109,15 +117,11 @@ To run this application, you must first download all the necessary requirements.
 
 ###### gui.py
 
-* The graphical interface is located in this file. It handles the layout and windows of the application. It allows users to input information that is then stored in the database. It handles buttons and event handlers. 
+* The graphical interface is located in this file. It handles the layout and windows of the application. It allows users to input information that is then stored in the database. It handles buttons and event handlers.
 
 
 
 ###### two\_factor\_authentication.py
 
 * The two-factor authentication file uses Google Authenticator via the pyotp library. Included in this file are the following functions: generate\_user\_key, display\_qr\_code, and verify\_key.
-
-
-
-
 
