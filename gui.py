@@ -53,6 +53,7 @@ class AppGui(tk.Tk):
     def show_frame(self, cont):
         frame = self.frames[cont]
 
+        #If the page has a function load_data, run the function load data
         if hasattr(frame, "load_data"):
             frame.load_data()
 
@@ -95,6 +96,11 @@ class BaseFrame(tk.Frame):
             return f"{digits[:3]}-{digits[3:]}"
         else:
             return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
+        
+    #Function to call load student
+    def get_current_student(self):
+        from data_handler import load_student
+        return load_student(self.controller.current_user)
         
     #Event handler that
     def on_phone_change(self, event):
@@ -258,10 +264,7 @@ class RegisterFrame(BaseFrame):
         except ValueError as e:
             print(e)        
 
-#!!!! Everything below is work in progress
-#I just copied a quick page layout from google
-#Remember to subclass with baseframe rather than tk.frame
-
+#Admin Page
 class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
@@ -276,23 +279,29 @@ class AdminFrame(BaseFrame):
 
         self.adminID_label.config(text= adminID)
  
-
+#Student Page
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        self.studentID_label = tk.Label(self.form, text="")
-        self.studentID_label.grid(row= 1, column= 4)
+        #Create Student Page Label
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
 
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
-
+    #Function that loads user ID from login
     def load_data(self):
-        studentID = self.controller.current_user
 
-        self.studentID_label.config(text= studentID)
+        #Get the student record
+        self.record = self.get_current_student()    
+        row = 1
 
-        
+        #Loop through all the records and display the label and the key
+        for label, key in self.record.items():
+            
+            tk.Label(self.form, text=f"{label}:", width=12, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
 
+            tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
+
+            row += 1
 
 
 #Create gui object
