@@ -9,6 +9,8 @@ Should Include:
 
 import tkinter as tk
 import validator as v
+import student as s
+import data_handler as dh
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -259,7 +261,111 @@ class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
+        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, pady = 10)
+
+        tk.Label(self.form, text = "Enter Student ID").grid(row = 1, column = 0, padx = 10)
+
+        self.entry = tk.Entry(self.form)
+        self.entry.grid(row = 2, column = 0)
+
+        tk.Button(self.form, text = "Submit", command = self.displayStudent).grid(row = 2, column = 1, sticky = "w")
+
+        self.editButton = tk.Button(self.form, text = "Edit", command = self.editStudent)
+        self.editButton.grid(row = 7, column = 1, pady = 10)
+        self.editButton.grid_remove()
+
+        #Button to log out
+        tk.Button(self.form, text="Log Out", command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
+        
+        self.data_frame = tk.Frame(self.form, bd = 2, relief = "groove", padx = 10, pady = 10)
+        self.data_frame.grid(row = 4, column = 0, columnspan = 2, pady = 10)
+        
+
+    def displayStudent(self):
+
+        #Gets student data from database
+        enteredID = self.entry.get()
+        student = dh.load_student(enteredID)
+
+        #Clears old data
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+        #Displays student data
+        row = 0
+        for key, value in student.items():
+            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
+            tk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
+            row += 1
+
+        self.currentData = student
+
+        self.editButton.grid()
+
+    def editStudent(self):
+
+        #Clear frame
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+        self.edit_entries = {}
+
+        row = 0
+        for key, value in self.currentData.items():
+            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w")
+
+            entry = tk.Entry(self.data_frame)
+            entry.insert(0, str(value))
+            entry.grid(row = row, column = 1, sticky = "w")
+
+            self.edit_entries[key] = entry
+            row += 1
+
+        self.editButton.config(text = "Save", command = self.saveStudent)
+
+    def saveStudent(self):
+        studentID = self.currentData["studentID"]
+
+        updates = {}
+        for key, entry in self.edit_entries.items():
+            if key == "studentID":
+                continue
+
+            value = entry.get()
+
+            if key == "adminStatus":
+                if value.lower() in ("true", "1", "yes"):
+                    value = True
+                elif value.lower() in ("false", "0", "no"):
+                    value = False
+                else:
+                    print("Invalid bolean value")
+                    return
+            
+            if key in ("age", "grade"):
+                try:
+                    value = int(value)
+                except ValueError:
+                    print(f"{key} must be a number")
+                    return
+                          
+            updates[key] = value
+
+        result = dh.update_student(studentID, **updates)
+
+        if result["success"]:
+            print("Updated successfully")
+        else:
+            print("Error:", result["error"])
+
+        self.displayStudent()
+
+        self.editButton.config(text = "Edit", command = self.edit_entries)
+
+
+    
+
+
  
 
 class StudentFrame(BaseFrame):
@@ -268,9 +374,6 @@ class StudentFrame(BaseFrame):
 
         tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
         
-
-
-
 #Create gui object
 app = AppGui()
 app.mainloop()
