@@ -27,6 +27,8 @@ class AppGui(tk.Tk):
 
         self.geometry("800x600")    #App window size
 
+        self.current_user = None
+
         #Create a container to store the different frames being displayed
         container = tk.Frame(self)
         container.pack(side= 'top', fill= 'both', expand= True)
@@ -47,11 +49,15 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
+        self.show_frame(LoginFrame)     #Default frame is login
  
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
+
+        if hasattr(frame, "load_data"):
+            frame.load_data()
+
         frame.tkraise()
         
 #Main Base frame for all frames for tidier grid 
@@ -102,6 +108,10 @@ class BaseFrame(tk.Frame):
         self.phone_number.delete(0, "end")
         self.phone_number.insert(0, formatted)
 
+    def get_current_student(self):
+        from data_handler import load_student
+        return load_student(self.controller.current_user)
+
 
 #Login Frame
 class LoginFrame(BaseFrame):
@@ -148,6 +158,7 @@ class LoginFrame(BaseFrame):
         
         #Run validate login to get the status (admin/student/failed login)
         status = validate_login(studentID.strip(), password.strip())
+        self.controller.current_user = studentID
 
         #If admin open admin page
         if status == "Admin":
@@ -253,10 +264,7 @@ class RegisterFrame(BaseFrame):
         except ValueError as e:
             print(e)        
 
-#!!!! Everything below is work in progress
-#I just copied a quick page layout from google
-#Remember to subclass with baseframe rather than tk.frame
-
+#Admin Page
 class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
@@ -362,18 +370,32 @@ class AdminFrame(BaseFrame):
 
         self.editButton.config(text = "Edit", command = self.edit_entries)
 
-
-    
-
-
- 
-
+#Student page
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
-        
+        #Create Student Page Label
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
+
+    #Function that loads user ID from login
+
+    def load_data(self):
+    #Get the student record
+        self.record = self.get_current_student()    
+        row = 1
+
+        #Loop through all the records and display the label and the key
+        for label, key in self.record.items():
+            
+            tk.Label(self.form, text=f"{label}:", width=12, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
+
+            tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
+
+            row += 1
+
+
+
 #Create gui object
 app = AppGui()
 app.mainloop()
