@@ -81,9 +81,9 @@ def save_student(record) -> None:
                                 phone = record.phoneNumber,
                                 email = record.email,
                                 adminStatus = record.adminStatus,
-                                math = record.mathGrade,
-                                programming = record.programmingGrade,
-                                science = record.scienceGrade)
+                                mathGrade = record.mathGrade,
+                                programmingGrade = record.programmingGrade,
+                                scienceGrade = record.scienceGrade)
     
         #Adds and commits new row to database
         session.add(studentRow)
@@ -296,7 +296,7 @@ def validate_login(student_id, input_password) -> str:
         
         #get the adminstatus of the id from the database
         query = sa.select(StudentTable.adminStatus).where(StudentTable.studentID == student_id)
-        adminStatus = session.execute(query).scalar_one_or_none()
+        adminStatus = session.execute(query).scalar_one_or_none
 
         #check if user is admin or student
         if adminStatus:
@@ -307,6 +307,31 @@ def validate_login(student_id, input_password) -> str:
         session.rollback()
         return None
 
+    finally:
+        session.close()
+
+def getGrades(student_id, class_subject: str):
+    session = Session()
+    class_subject = class_subject.lower().strip()
+    try:
+        match class_subject:
+            case "math":
+                query = sa.select(StudentTable.mathGrade).where(StudentTable.studentID == student_id)
+            case "programming":
+                query = sa.select(StudentTable.programmingGrade).where(StudentTable.studentID == student_id)
+            case "science":
+                query = sa.select(StudentTable.scienceGrade).where(StudentTable.studentID == student_id)
+            case _:
+                print("No subject found")
+
+        classScore = session.execute(query).scalar_one_or_none()
+
+        return int(classScore)
+    
+    except Exception as e:
+        session.rollback()
+        return None
+    
     finally:
         session.close()
 
