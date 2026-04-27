@@ -9,6 +9,8 @@ Should Include:
 
 import tkinter as tk
 import validator as v
+import student as s
+import data_handler as dh
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -53,7 +55,6 @@ class AppGui(tk.Tk):
     def show_frame(self, cont):
         frame = self.frames[cont]
 
-        #If the page has a function load_data, run the function load data
         if hasattr(frame, "load_data"):
             frame.load_data()
 
@@ -97,11 +98,6 @@ class BaseFrame(tk.Frame):
         else:
             return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
         
-    #Function to call load student
-    def get_current_student(self):
-        from data_handler import load_student
-        return load_student(self.controller.current_user)
-        
     #Event handler that
     def on_phone_change(self, event):
 
@@ -111,6 +107,10 @@ class BaseFrame(tk.Frame):
 
         self.phone_number.delete(0, "end")
         self.phone_number.insert(0, formatted)
+
+    def get_current_student(self):
+        from data_handler import load_student
+        return load_student(self.controller.current_user)
 
 
 #Login Frame
@@ -251,7 +251,7 @@ class RegisterFrame(BaseFrame):
             age= self.age.get().strip(),
             gender= self.gender.get().strip(),
             phoneNumber= self.phone_number.get().strip(),
-            email= self.email.get().strip(),
+            email= self.email.get().strip()
         )
         
         #Try to save the studen records and hashed password into the database and goes to student page when succeeds
@@ -269,29 +269,136 @@ class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        self.adminID_label = tk.Label(self.form, text="")
-        self.adminID_label.grid(row= 1, column= 4)
+        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, pady = 10)
 
-        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
-    
-    def load_data(self):
-        adminID = self.controller.current_user
+        tk.Label(self.form, text = "Enter Student ID").grid(row = 1, column = 0, padx = 10)
 
-        self.adminID_label.config(text= adminID)
- 
-#Student Page
+        self.entry = tk.Entry(self.form)
+        self.entry.grid(row = 2, column = 0)
+
+        tk.Button(self.form, text = "Submit", command = self.displayStudent).grid(row = 2, column = 1, sticky = "w")
+
+        self.editButton = tk.Button(self.form, text = "Edit", command = self.editStudent)
+        self.editButton.grid(row = 7, column = 1, pady = 10)
+        self.editButton.grid_remove()
+
+        self.deleteButton = tk.Button(self.form, text = "Delete", command = self.deleteStudent)
+        self.deleteButton.grid(row = 3, column = 1, sticky = "w")
+        self.deleteButton.grid_remove()
+
+        #Button to log out
+        tk.Button(self.form, text="Log Out", command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
+        
+        self.data_frame = tk.Frame(self.form, bd = 2, relief = "groove", padx = 10, pady = 10)
+        self.data_frame.grid(row = 4, column = 0, columnspan = 2, pady = 10)
+        
+
+    def displayStudent(self):
+
+        #Gets student data from database
+        enteredID = self.entry.get()
+        student = dh.load_student(enteredID)
+
+        #Clears old data
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+        #Displays student data
+        row = 0
+        for key, value in student.items():
+            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
+            tk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
+            row += 1
+
+        self.currentData = student
+
+        self.editButton.grid()
+        self.deleteButton.grid()
+
+    def editStudent(self):
+
+        #Clear frame
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+        self.edit_entries = {}
+
+        row = 0
+        for key, value in self.currentData.items():
+            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w")
+
+            entry = tk.Entry(self.data_frame)
+            entry.insert(0, str(value))
+            entry.grid(row = row, column = 1, sticky = "w")
+
+            self.edit_entries[key] = entry
+            row += 1
+
+        self.editButton.config(text = "Save", command = self.saveStudent)
+
+    def saveStudent(self):
+        studentID = self.currentData["studentID"]
+
+        updates = {}
+        for key, entry in self.edit_entries.items():
+            if key == "studentID":
+                continue
+
+            value = entry.get()
+
+            if key == "adminStatus":
+                if value.lower() in ("true", "1", "yes"):
+                    value = True
+                elif value.lower() in ("false", "0", "no"):
+                    value = False
+                else:
+                    print("Invalid bolean value")
+                    return
+            
+            if key in ("age", "grade"):
+                try:
+                    value = int(value)
+                except ValueError:
+                    print(f"{key} must be a number")
+                    return
+                          
+            updates[key] = value
+
+        result = dh.update_student(studentID, **updates)
+
+        if result["success"]:
+            print("Updated successfully")
+        else:
+            print("Error:", result["error"])
+
+        self.displayStudent()
+
+        self.editButton.config(text = "Edit", command = self.edit_entries)
+
+    def deleteStudent(self):
+
+        studentID = self.currentData["studentID"]
+
+        dh.delete_student(studentID)
+
+        #Clear frame
+        for widget in self.data_frame.winfo_children():
+            widget.destroy()
+
+#Student page
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
         #Create Student Page Label
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
 
     #Function that loads user ID from login
-    def load_data(self):
 
-        #Get the student record
-        self.record = self.get_current_student()    
+    def load_data(self):
+    #Get the student record
+        self.record = self.get_current_student() 
+        print (self.record)  
         row = 1
 
         #Loop through all the records and display the label and the key
@@ -302,6 +409,7 @@ class StudentFrame(BaseFrame):
             tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
 
             row += 1
+
 
 
 #Create gui object
