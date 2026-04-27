@@ -25,6 +25,8 @@ class AppGui(tk.Tk):
 
         self.geometry("800x600")    #App window size
 
+        self.current_user = None
+
         #Create a container to store the different frames being displayed
         container = tk.Frame(self)
         container.pack(side= 'top', fill= 'both', expand= True)
@@ -45,11 +47,15 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
+        self.show_frame(LoginFrame)     #Default frame is login
  
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
+
+        if hasattr(frame, "load_data"):
+            frame.load_data()
+
         frame.tkraise()
         
 #Main Base frame for all frames for tidier grid 
@@ -146,6 +152,7 @@ class LoginFrame(BaseFrame):
         
         #Run validate login to get the status (admin/student/failed login)
         status = validate_login(studentID.strip(), password.strip())
+        self.controller.current_user = studentID
 
         #If admin open admin page
         if status == "Admin":
@@ -259,14 +266,31 @@ class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
+        self.adminID_label = tk.Label(self.form, text="")
+        self.adminID_label.grid(row= 1, column= 4)
+
         tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
+    
+    def load_data(self):
+        adminID = self.controller.current_user
+
+        self.adminID_label.config(text= adminID)
  
 
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
+        self.studentID_label = tk.Label(self.form, text="")
+        self.studentID_label.grid(row= 1, column= 4)
+
         tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, padx = 10, pady = 10)
+
+    def load_data(self):
+        studentID = self.controller.current_user
+
+        self.studentID_label.config(text= studentID)
+
         
 
 
