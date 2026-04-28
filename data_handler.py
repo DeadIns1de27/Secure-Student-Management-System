@@ -310,6 +310,31 @@ def validate_login(student_id, input_password) -> str:
     finally:
         session.close()
 
+def getGrades(student_id, class_subject: str):
+    session = Session()
+    class_subject = class_subject.lower().strip()
+    try:
+        match class_subject:
+            case "math":
+                query = sa.select(StudentTable.mathGrade).where(StudentTable.studentID == student_id)
+            case "programming":
+                query = sa.select(StudentTable.programmingGrade).where(StudentTable.studentID == student_id)
+            case "science":
+                query = sa.select(StudentTable.scienceGrade).where(StudentTable.studentID == student_id)
+            case _:
+                print("No subject found")
+
+        classScore = session.execute(query).scalar_one_or_none()
+
+        return int(classScore)
+    
+    except Exception as e:
+        session.rollback()
+        return None
+    
+    finally:
+        session.close()
+
 def getGradesArray():
 
     session = Session()

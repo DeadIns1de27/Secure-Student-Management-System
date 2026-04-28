@@ -391,7 +391,7 @@ class StudentFrame(BaseFrame):
         super().__init__(parent, controller)
 
         #Create Student Page Label
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=3, padx = 10, pady = 10)        
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
         tk.Button(self.form, text= "Log Out", command=lambda: self.controller.show_frame(LoginFrame)).grid(row= 20, column= 4, columnspan=2, padx= 10, pady= 10)
 
     #Function that loads user ID from login
@@ -399,16 +399,15 @@ class StudentFrame(BaseFrame):
     def load_data(self):
     #Get the student record
         self.record = self.get_current_student() 
-        print (self.record)  
         row = 1
 
         #Loop through all the records and display the label and the key
         for label, key in self.record.items():
             
             if label == "adminStatus":
-                return
+                continue
 
-            tk.Label(self.form, text=f"{label}:", width=12, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
+            tk.Label(self.form, text=f"{label}:", width=20, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
 
             tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
 
