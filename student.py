@@ -21,9 +21,9 @@ class StudentRecord():
         self.gender = gender
         self.phoneNumber = phoneNumber
         self.email = email
-        self.adminStatus = False,
-        self.mathGrade = 0,
-        self.programmingGrade = 0,
+        self.adminStatus = False
+        self.mathGrade = 0
+        self.programmingGrade = 0
         self.scienceGrade = 0
 
     #Generates a unique id that isnt registered in the database
