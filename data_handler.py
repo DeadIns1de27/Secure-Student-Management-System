@@ -296,7 +296,7 @@ def validate_login(student_id, input_password) -> str:
         
         #get the adminstatus of the id from the database
         query = sa.select(StudentTable.adminStatus).where(StudentTable.studentID == student_id)
-        adminStatus = session.execute(query).scalar_one_or_none
+        adminStatus = session.execute(query).scalar_one_or_none()
 
         #check if user is admin or student
         if adminStatus:
