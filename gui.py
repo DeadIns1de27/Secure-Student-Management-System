@@ -49,7 +49,7 @@ class AppGui(tk.Tk):
 
         #create each frame and store
         #Note: Add new frame class into this
-        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame, twoFactorFrame, welcomeFrame):
+        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame, twoFactorFrame, welcomeFrame, VisualizationFrame):
  
             frame = F(container, self)
  
@@ -58,7 +58,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(LoginFrame)     #Default frame is login
+        self.show_frame(AdminFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
@@ -432,16 +432,23 @@ class VisualizationFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
+        tk.Label(self.form, text = "Data Visualization", font = LARGEFONT).grid(row = 0, column = 1)
+
+        tk.Label(self.form, text = "Enter Class Name").grid(row = 1, column = 1)
+
         self.entry = tk.Entry(self.form)
-        self.entry.grid(row = 2, column = 0)
+        self.entry.grid(row = 2, column = 1)
+
+        tk.Button(self.form, text = "Submit", command = self.showVisual).grid(row = 2, column = 2)
 
     def showVisual(self):
 
         
         fig = Figure(figsize = (5, 4), dpi = 100)
-        ax = fig.add_subplot(111)
-        arr = dh.getGradesArray()
-        arr.sort()
+        ax = fig.add_subplot()
+        className = self.entry.get()
+        arr = dh.getGradesArray(className)
+        
         ax.hist(arr)
         ax.set_title("Grade Distribution")
 
