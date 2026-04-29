@@ -22,6 +22,8 @@ If they fail three times, return false
 #import pyotp and qrcode
 import pyotp
 import qrcode
+import io
+from PIL import Image, ImageTk
 
 #TwoFactorAuthentication() Class
 class TwoFactorAuthentication():
@@ -42,32 +44,18 @@ class TwoFactorAuthentication():
         uri = pyotp.totp.TOTP(secret_key).provisioning_uri(name = str(studentID),
                                                     issuer_name = self.issuer_name)
         #convert uri to a file based off studentID 700######
-        qrcode.make(uri).save(f"{studentID}qrCode.png")
-        #save filename as a variable
-        qr_code_filename = f"{studentID}qrCode.png"
-        #return variable
-        return qr_code_filename
+        qr = qrcode.make(uri)
 
-    def verify_key(self, secret_key):
+        qr = qr.resize((200, 200))
+        photo = ImageTk.PhotoImage(qr)
+
+        return photo
+
+    def verify_key(self, secret_key, code):
         #initializes one time password based on current time and secret key
         totp = pyotp.TOTP(secret_key)
-        #initialize attempts to 0
-        attempts = 0
-
-        #while loop that gives user three attempts to enter correct code
-        while attempts < 3:
-            #prompt user for six digit code
-            if totp.verify(input("Enter the code: ")):
-                #if code is correct, print success message and return True
-                print("Verification successful.")
-                return True
-            #if code is incorrect, print "incorrect code" message and prompt user once again
-            print("Incorrect code! Try again.")
-            #increment failed attempts by 1
-            attempts += 1
-        #if three failed attempts are reached, print failure message and return false
-        print("Too many incorrect attempts. Authentication failed.")
-        return False
+ 
+        return totp.verify(code)
 
 #Example / Test Case, only works when executed directly
 if __name__ == "__main__":

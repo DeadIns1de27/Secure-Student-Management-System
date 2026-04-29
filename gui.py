@@ -8,11 +8,16 @@ Should Include:
 """
 
 import tkinter as tk
+from tkinter import messagebox
+
 import validator as v
 import student as s
 import data_handler as dh
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from two_factor_authentication import TwoFactorAuthentication
+import session_manager as sm
+from session_manager import SessionManager
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -31,6 +36,8 @@ class AppGui(tk.Tk):
 
         self.current_user = None
 
+        self.adminStatus = None
+
         #Create a container to store the different frames being displayed
         container = tk.Frame(self)
         container.pack(side= 'top', fill= 'both', expand= True)
@@ -42,7 +49,7 @@ class AppGui(tk.Tk):
 
         #create each frame and store
         #Note: Add new frame class into this
-        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame):
+        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame, twoFactorFrame, welcomeFrame):
  
             frame = F(container, self)
  
@@ -51,8 +58,10 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
- 
+        self.show_frame(LoginFrame)     #Default frame is login
+
+        self.session_manager = SessionManager()
+
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -139,39 +148,39 @@ class LoginFrame(BaseFrame):
         #Button to register a new account
         tk.Button(self.form, text="Register Account", command= lambda: self.controller.show_frame(RegisterFrame)).grid(row= 8, column= 4, pady= 5)
 
-    #Function to check the login status
+    # Function to check the login status
     def login(self):
 
-        #import validate login only for this function call
-        from data_handler import validate_login
-
-        #Get student id and password from entry box
+        # Get student id and password from entry box
         studentID = self.studentID.get().strip()
         password = self.password.get().strip()
 
-        #Validate format for studentid and password
+        # Validate format for studentID and password
+        #if id or password do not match requirements, return
         if not v.validate_id(studentID):
-            print("Invalid Student ID")
-            return 
-        
-        if not v.validate_password(password):
-            print("Invalid Password")
+            messagebox.showerror("Invalid Student ID", "Student ID does not fit criteria. Please try again.")
             return
-        
-        #Run validate login to get the status (admin/student/failed login)
-        status = validate_login(studentID.strip(), password.strip())
-        self.controller.current_user = studentID
 
-        #If admin open admin page
-        if status == "Admin":
-            self.controller.show_frame(AdminFrame)
+        if not v.validate_password(password):
+            messagebox.showerror("Invalid Password", "Password does not fit criteria. Please try again.")
+            return
 
-        #if student open student page
-        elif status == "Student":
-            self.controller.show_frame(StudentFrame)
+        #Call track_login_attempts to get the status (admin/student/failed login)
+        self.controller.adminStatus = self.controller.session_manager.track_login_attempts(studentID.strip(), password.strip())
+
+        #check status and show student/admin frame
+        #if password is incorrect or they are locked out, return an error message
+        if self.controller.adminStatus == "Incorrect":
+            messagebox.showerror("Login Failed", "Incorrect login. Please try again.")
+            return
+
+        elif self.controller.adminStatus == "Locked":
+            messagebox.showerror("Account Locked", "Too many failed login attempts.")
+            return
 
         else:
-            print("Login Failed")
+            self.controller.current_user = studentID
+            self.controller.show_frame(twoFactorFrame)
 
 #Register Frame
 class RegisterFrame(BaseFrame):
@@ -261,7 +270,8 @@ class RegisterFrame(BaseFrame):
             save_student(record)
             save_password(record.studentID, hash_password(self.password.get().strip()))
             print("Account Created")
-            self.controller.show_frame(LoginFrame)
+            self.controller.current_user = record.studentID
+            self.controller.show_frame(twoFactorFrame)
 
         except ValueError as e:
             print(e)        
@@ -395,7 +405,7 @@ class StudentFrame(BaseFrame):
         super().__init__(parent, controller)
 
         #Create Student Page Label
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=3, padx = 10, pady = 10)        
+        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
         tk.Button(self.form, text= "Log Out", command=lambda: self.controller.show_frame(LoginFrame)).grid(row= 20, column= 4, columnspan=2, padx= 10, pady= 10)
 
     #Function that loads user ID from login
@@ -403,16 +413,15 @@ class StudentFrame(BaseFrame):
     def load_data(self):
     #Get the student record
         self.record = self.get_current_student() 
-        print (self.record)  
         row = 1
 
         #Loop through all the records and display the label and the key
         for label, key in self.record.items():
             
             if label == "adminStatus":
-                return
+                continue
 
-            tk.Label(self.form, text=f"{label}:", width=12, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
+            tk.Label(self.form, text=f"{label}:", width=20, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
 
             tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
 
@@ -440,7 +449,107 @@ class VisualizationFrame(BaseFrame):
         canvas.draw()
         canvas.get_tk_widget().grid(row = 4, column = 1)
 
+class twoFactorFrame(BaseFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
 
+        self.attempts = 0
+        self.tfa = TwoFactorAuthentication()
+
+    def load_data(self):
+        from data_handler import load_twoFA_key
+        print(self.controller.current_user)
+        self.reset_frame()  
+
+        self.student = self.controller.current_user
+
+        self.secret_key = load_twoFA_key(self.student)
+
+        try:
+            if self.secret_key is None:
+                self.show_qr_code()
+            else:
+                self.hide_qr_code()
+
+        
+        except Exception as e:
+            return e
+
+    def show_qr_code(self):
+        from data_handler import save_twoFA_key
+
+        tk.Label(self.form, text= "Scan The QR Code", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        tk.Label(self.form, text= f"Your student ID is {self.student}").grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
+
+        self.qr_label = tk.Label(self.form)
+        self.qr_label.grid(row=2, column=4, columnspan=2)
+
+        self.secret_key = self.tfa.generate_user_key()
+
+        save_twoFA_key(self.student, self.secret_key)
+
+        self.display_qr_image(self.secret_key, self.student)
+
+        tk.Button(self.form, text="Log In", command=lambda: self.controller.show_frame(LoginFrame)).grid(row=4, column=4, columnspan=2)
+
+
+    def hide_qr_code(self):
+
+        tk.Label(self.form, text= "Enter The OTP", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+
+                # OTP entry (always reused)
+        self.code_entry = tk.Entry(self.form)
+        self.code_entry.grid(row=3, column=4, columnspan=2)
+
+        self.status_label = tk.Label(self.form, text="")
+        self.status_label.grid(row=5, column=4, columnspan=2)
+
+        tk.Button(self.form, text="Verify", command= self.on_verify).grid(row=4, column=4, columnspan=2)
+
+
+
+    def display_qr_image(self, key, student):
+        
+        self.qr_photo = self.tfa.display_qr_code(key, student)
+
+        self.qr_label.config(image= self.qr_photo)
+        self.qr_label.image = self.qr_photo
+
+    def on_verify(self):
+
+        code = self.code_entry.get().strip()
+        if self.tfa.verify_key(self.secret_key, code):
+
+            self.status_label.config(text= "Success!")
+
+            self.route_user()
+
+        else:
+
+            self.attempts += 1
+            self.status_label.config(text= "Incorrect Code")
+
+            if self.attempts >= 3:
+                self.status_label.config(text= "Too many attempts")
+                self.controller.show_frame(welcomeFrame)
+
+    def route_user(self):
+
+        if self.controller.adminStatus == "Admin":
+            self.controller.show_frame(AdminFrame)
+
+        elif self.controller.adminStatus == "Student":
+            self.controller.show_frame(StudentFrame)
+
+    def reset_frame(self):
+        for widget in self.form.winfo_children():
+            widget.destroy()
+
+class welcomeFrame(BaseFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+
+        tk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
 
 #Create gui object
 app = AppGui()

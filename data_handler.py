@@ -64,7 +64,7 @@ class StudentCredentials(Base):
     id = sa.Column(sa.Integer, primary_key = True, autoincrement = True)
     studentID = sa.Column(sa.Integer, sa.ForeignKey("student_info.studentID"))
     password = sa.Column(sa.String)
-
+    twoFA_key = sa.Column(sa.String)
 
 #Creates tables
 Base.metadata.create_all(engine)
@@ -278,6 +278,50 @@ def delete_password_row(student_id):
     finally:
         session.close()
 
+#Adds a key to the database
+def save_twoFA_key(student_id, key):
+    session = Session()
+
+    try:
+        query = sa.select(StudentCredentials).where(StudentCredentials.studentID == student_id)
+        row = session.execute(query).scalar_one_or_none()
+
+        if row is None:
+            return None
+        
+        row.twoFA_key = key
+
+        session.commit()
+
+        return {"success": True, "message": "Saved 2FA key"}
+    
+    except Exception as e:
+        session.rollback()
+        return e
+    
+    finally:
+        session.close()
+
+#Loads the key saved in the database
+def load_twoFA_key(student_id):
+    session = Session()
+
+    try:
+        query = sa.select(StudentCredentials.twoFA_key).where(StudentCredentials.studentID == student_id)
+        row = session.execute(query).scalar_one_or_none()
+
+        if row is None:
+            return None
+        
+        return row
+    
+    except Exception as e:
+        session.rollback()
+        return e
+
+    finally:
+        session.close()
+
 #checks the user password and also their status(admin / student)
 def validate_login(student_id, input_password) -> str:
     session = Session()
@@ -307,6 +351,31 @@ def validate_login(student_id, input_password) -> str:
         session.rollback()
         return None
 
+    finally:
+        session.close()
+
+def getGrades(student_id, class_subject: str):
+    session = Session()
+    class_subject = class_subject.lower().strip()
+    try:
+        match class_subject:
+            case "math":
+                query = sa.select(StudentTable.mathGrade).where(StudentTable.studentID == student_id)
+            case "programming":
+                query = sa.select(StudentTable.programmingGrade).where(StudentTable.studentID == student_id)
+            case "science":
+                query = sa.select(StudentTable.scienceGrade).where(StudentTable.studentID == student_id)
+            case _:
+                print("No subject found")
+
+        classScore = session.execute(query).scalar_one_or_none()
+
+        return int(classScore)
+    
+    except Exception as e:
+        session.rollback()
+        return None
+    
     finally:
         session.close()
 
