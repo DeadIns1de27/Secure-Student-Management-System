@@ -314,15 +314,9 @@ def getGradesArray():
 
     session = Session()
 
-    statement = sa.select(StudentTable.grade)
+    statement = sa.select(StudentTable.mathGrade)
     rows = session.execute(statement).all()
 
-    grade_lists = []
-
-    for (grade_str,) in rows:
-        grades = [int(x) for x in grade_str.split(",")]
-        grade_lists.append(grades)
-
-    arr = np.array(grade_lists)
+    arr = np.array(rows)
 
     return arr
