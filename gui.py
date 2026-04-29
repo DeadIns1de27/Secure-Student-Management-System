@@ -11,6 +11,8 @@ import tkinter as tk
 import validator as v
 import student as s
 import data_handler as dh
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -49,7 +51,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(LoginFrame)     #Default frame is login
+        self.show_frame(AdminFrame)     #Default frame is login
  
     # to display the current frame passed as parameter
     def show_frame(self, cont):
@@ -286,6 +288,8 @@ class AdminFrame(BaseFrame):
         self.deleteButton.grid(row = 3, column = 1, sticky = "w")
         self.deleteButton.grid_remove()
 
+        tk.Button(self.form, text = "Visualization", command = lambda: self.controller.show_frame(VisualizationFrame)).grid(row = 4, column = 1)
+
         #Button to log out
         tk.Button(self.form, text="Log Out", command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
         
@@ -384,7 +388,7 @@ class AdminFrame(BaseFrame):
         #Clear frame
         for widget in self.data_frame.winfo_children():
             widget.destroy()
-
+            
 #Student page
 class StudentFrame(BaseFrame):
     def __init__(self, parent, controller):
@@ -413,6 +417,28 @@ class StudentFrame(BaseFrame):
             tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
 
             row += 1
+
+class VisualizationFrame(BaseFrame):
+    
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+
+        self.entry = tk.Entry(self.form)
+        self.entry.grid(row = 2, column = 0)
+
+    def showVisual(self):
+
+        
+        fig = Figure(figsize = (5, 4), dpi = 100)
+        ax = fig.add_subplot(111)
+        arr = dh.getGradesArray()
+        arr.sort()
+        ax.hist(arr)
+        ax.set_title("Grade Distribution")
+
+        canvas = FigureCanvasTkAgg(fig, master = self.form)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row = 4, column = 1)
 
 
 
