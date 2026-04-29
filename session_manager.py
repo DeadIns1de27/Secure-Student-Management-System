@@ -5,37 +5,37 @@ It will count the number of login attempts and increment after each failed attem
 If the correct email and password are input, return true.
 After three failed attempts, return false.
 '''
-#from security import verify_password
+
 from data_handler import validate_login
+from two_factor_authentication import TwoFactorAuthentication
 
 class SessionManager():
     def __init__(self):
         self.session = None
+        self.attempts = 0
+        self.max_attempts = 3
 
-    def track_attempts(self, user):
+    def track_login_attempts(self, userID, password):
         #initialize functions to track number of login attempts
-        login_attempts = 0
-        max_attempts = 3
+        if self.attempts >= self.max_attempts:
+            return "Locked"
 
-        #loop through as long as the max attempts haven't been reached
-        while login_attempts < max_attempts:
+        status = validate_login(userID, password)
+        self.attempts += 1
+        if status is None:
+            if self.attempts >= self.max_attempts:
+                return "Locked"
+            return"Incorrect"
 
-            #prompt user for ID and password
-            input_id = input("Enter ID: ")
-            input_password = input("Enter password: ")
+        elif status == "Admin":
+            self.attempts = 0
+            return "Admin"
 
-            #check for valid studentID and password
-            if validate_login(input_id, input_password):
-               print("Login Successful")
-               return True
-            else:
-                print("Incorrect ID or password")
-                login_attempts += 1
-
-        print("Too many incorrect login attempts")
-        return False
+        elif status == "Student":
+            self.attempts = 0
+            return"Student"
 
 #Example / Test Case, only works when executed directly
 if __name__ == "__main__":
     manager = SessionManager()
-    manager.track_attempts(None)
+    print(manager.track_login_attempts("700783695", "testPassword"))
