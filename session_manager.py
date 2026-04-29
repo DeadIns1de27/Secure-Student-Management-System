@@ -21,10 +21,10 @@ class SessionManager():
             return "Locked"
 
         status = validate_login(userID, password)
+        self.attempts += 1
         if status is None:
             if self.attempts >= self.max_attempts:
                 return "Locked"
-            self.attempts += 1
             return"Incorrect"
 
         elif status == "Admin":

@@ -14,6 +14,7 @@ import validator as v
 import student as s
 import data_handler as dh
 import session_manager as sm
+from session_manager import SessionManager
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -53,7 +54,9 @@ class AppGui(tk.Tk):
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
         self.show_frame(LoginFrame)     #Default frame is login
- 
+
+        self.session_manager = SessionManager()
+
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
