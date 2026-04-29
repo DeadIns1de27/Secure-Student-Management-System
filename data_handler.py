@@ -49,8 +49,10 @@ class StudentTable(Base):
     gender = sa.Column(sa.String)
     phone = sa.Column(sa.String)
     email = sa.Column(sa.String)
-    grade = sa.Column(sa.Text)
     adminStatus = sa.Column(sa.Boolean)
+    mathGrade = sa.Column(sa.Integer)
+    programmingGrade = sa.Column(sa.Integer)
+    scienceGrade = sa.Column(sa.Integer)
 
 #Stores studentID and hased password
 class StudentCredentials(Base):
@@ -78,8 +80,10 @@ def save_student(record) -> None:
                                 gender = record.gender,
                                 phone = record.phoneNumber,
                                 email = record.email,
-                                grade = record.grade,
-                                adminStatus = record.adminStatus)
+                                adminStatus = record.adminStatus,
+                                mathGrade = record.mathGrade,
+                                programmingGrade = record.programmingGrade,
+                                scienceGrade = record.scienceGrade)
     
         #Adds and commits new row to database
         session.add(studentRow)
@@ -303,6 +307,31 @@ def validate_login(student_id, input_password) -> str:
         session.rollback()
         return None
 
+    finally:
+        session.close()
+
+def getGrades(student_id, class_subject: str):
+    session = Session()
+    class_subject = class_subject.lower().strip()
+    try:
+        match class_subject:
+            case "math":
+                query = sa.select(StudentTable.mathGrade).where(StudentTable.studentID == student_id)
+            case "programming":
+                query = sa.select(StudentTable.programmingGrade).where(StudentTable.studentID == student_id)
+            case "science":
+                query = sa.select(StudentTable.scienceGrade).where(StudentTable.studentID == student_id)
+            case _:
+                print("No subject found")
+
+        classScore = session.execute(query).scalar_one_or_none()
+
+        return int(classScore)
+    
+    except Exception as e:
+        session.rollback()
+        return None
+    
     finally:
         session.close()
 
