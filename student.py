@@ -91,3 +91,4 @@ class gradeManager():
                 count += 1
 
         return total / count
+
