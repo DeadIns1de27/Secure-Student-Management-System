@@ -379,13 +379,33 @@ def getGrades(student_id, class_subject: str):
     finally:
         session.close()
 
-def getGradesArray():
+def getGradesArray(className: str):
 
     session = Session()
 
-    statement = sa.select(StudentTable.mathGrade)
-    rows = session.execute(statement).all()
+    className = className.lower()
+    try:
+        match className:
+            case "math":
+                query = StudentTable.mathGrade
+            case "programming":
+                query = StudentTable.programmingGrade
+            case "science":
+                query = StudentTable.scienceGrade
+            case _:
+                print("No subject found")
 
-    arr = np.array(rows)
+        rows = session.query(query).all()
 
-    return arr
+        arr = np.array(rows)
+
+        return arr
+    
+    except Exception as e:
+        session.rollback()
+        return None
+    
+    finally:
+        session.close()
+
+getGradesArray("math")
