@@ -10,6 +10,7 @@ perform calculations like calculate_average.
 
 from random import randint
 
+
 #StudentRecord class
 class StudentRecord():
 
@@ -40,3 +41,55 @@ class StudentRecord():
 
             if load_student(studentID) is None:
                 return studentID
+
+class gradeManager():
+
+    #Function to change percentage into GPA scale
+    def calculate_to_GPA(grade):
+        if grade is None:
+            return None
+        grade = float(grade)
+
+        if grade >= 90:
+            return 4.0
+        if grade >= 80:
+            return 3.0
+        if grade >= 70:
+            return 2.0
+        if grade >= 60:
+            return 1.0
+        else:
+            return 0.0
+        
+    #Function to get grades and convert them to GPA
+    def get_student_grades(studentID):
+        #Import the student data
+        from data_handler import getGrades
+
+        #Creates a list of Grades now in GPA scale
+        grades = [
+            gradeManager.calculate_to_GPA(getGrades(studentID, "math")),
+            gradeManager.calculate_to_GPA(getGrades(studentID, "programming")),
+            gradeManager.calculate_to_GPA(getGrades(studentID, "science"))
+            ]
+        #Remove any missing grades
+        grades = [g for g in grades if g is not None]
+        #Returns a 2D list of grades
+        return [grades]
+
+    #Function to calculate average from grades
+    def calculate_average(grades):
+        if not grades:
+            return None
+
+        total = 0
+        count = 0
+
+        for row in grades:
+            for value in row:
+                total += value
+                count += 1
+
+        return total / count
+
+
