@@ -8,10 +8,14 @@ Should Include:
 """
 
 import tkinter as tk
+from tkinter import messagebox
+
 import validator as v
 import student as s
 import data_handler as dh
 from two_factor_authentication import TwoFactorAuthentication
+import session_manager as sm
+from session_manager import SessionManager
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -53,7 +57,9 @@ class AppGui(tk.Tk):
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
         self.show_frame(LoginFrame)     #Default frame is login
- 
+
+        self.session_manager = SessionManager()
+
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -140,31 +146,39 @@ class LoginFrame(BaseFrame):
         #Button to register a new account
         tk.Button(self.form, text="Register Account", command= lambda: self.controller.show_frame(RegisterFrame)).grid(row= 8, column= 4, pady= 5)
 
-    #Function to check the login status
+    # Function to check the login status
     def login(self):
 
-        #import validate login only for this function call
-        from data_handler import validate_login
-
-        #Get student id and password from entry box
+        # Get student id and password from entry box
         studentID = self.studentID.get().strip()
         password = self.password.get().strip()
 
-        #Validate format for studentid and password
+        # Validate format for studentID and password
+        #if id or password do not match requirements, return
         if not v.validate_id(studentID):
-            print("Invalid Student ID")
-            return 
-        
-        if not v.validate_password(password):
-            print("Invalid Password")
+            messagebox.showerror("Invalid Student ID", "Student ID does not fit criteria. Please try again.")
             return
-        
-        #Run validate login to get the status (admin/student/failed login)
-        self.controller.adminStatus = validate_login(studentID.strip(), password.strip())
-        self.controller.current_user = studentID
 
-        self.controller.show_frame(twoFactorFrame)
+        if not v.validate_password(password):
+            messagebox.showerror("Invalid Password", "Password does not fit criteria. Please try again.")
+            return
 
+        #Call track_login_attempts to get the status (admin/student/failed login)
+        self.controller.adminStatus = self.controller.session_manager.track_login_attempts(studentID.strip(), password.strip())
+
+        #check status and show student/admin frame
+        #if password is incorrect or they are locked out, return an error message
+        if self.controller.adminStatus == "Incorrect":
+            messagebox.showerror("Login Failed", "Incorrect login. Please try again.")
+            return
+
+        elif self.controller.adminStatus == "Locked":
+            messagebox.showerror("Account Locked", "Too many failed login attempts.")
+            return
+
+        else:
+            self.controller.current_user = studentID
+            self.controller.show_frame(twoFactorFrame)
 
 #Register Frame
 class RegisterFrame(BaseFrame):
@@ -418,7 +432,7 @@ class twoFactorFrame(BaseFrame):
 
     def load_data(self):
         from data_handler import load_twoFA_key
-
+        print(self.controller.current_user)
         self.reset_frame()  
 
         self.student = self.controller.current_user
@@ -494,7 +508,7 @@ class twoFactorFrame(BaseFrame):
                 self.controller.show_frame(welcomeFrame)
 
     def route_user(self):
-        
+
         if self.controller.adminStatus == "Admin":
             self.controller.show_frame(AdminFrame)
 
