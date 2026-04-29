@@ -11,6 +11,7 @@ import tkinter as tk
 import validator as v
 import student as s
 import data_handler as dh
+from two_factor_authentication import TwoFactorAuthentication
 
 #Font and size for titles
 LARGEFONT =("Times New Roman", 35)
@@ -29,6 +30,8 @@ class AppGui(tk.Tk):
 
         self.current_user = None
 
+        self.adminStatus = None
+
         #Create a container to store the different frames being displayed
         container = tk.Frame(self)
         container.pack(side= 'top', fill= 'both', expand= True)
@@ -40,7 +43,7 @@ class AppGui(tk.Tk):
 
         #create each frame and store
         #Note: Add new frame class into this
-        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame):
+        for F in (LoginFrame, StudentFrame, AdminFrame, RegisterFrame, twoFactorFrame, welcomeFrame):
  
             frame = F(container, self)
  
@@ -157,19 +160,11 @@ class LoginFrame(BaseFrame):
             return
         
         #Run validate login to get the status (admin/student/failed login)
-        status = validate_login(studentID.strip(), password.strip())
+        self.controller.adminStatus = validate_login(studentID.strip(), password.strip())
         self.controller.current_user = studentID
 
-        #If admin open admin page
-        if status == "Admin":
-            self.controller.show_frame(AdminFrame)
+        self.controller.show_frame(twoFactorFrame)
 
-        #if student open student page
-        elif status == "Student":
-            self.controller.show_frame(StudentFrame)
-
-        else:
-            print("Login Failed")
 
 #Register Frame
 class RegisterFrame(BaseFrame):
@@ -259,7 +254,8 @@ class RegisterFrame(BaseFrame):
             save_student(record)
             save_password(record.studentID, hash_password(self.password.get().strip()))
             print("Account Created")
-            self.controller.show_frame(LoginFrame)
+            self.controller.current_user = record.studentID
+            self.controller.show_frame(twoFactorFrame)
 
         except ValueError as e:
             print(e)        
@@ -413,7 +409,107 @@ class StudentFrame(BaseFrame):
 
             row += 1
 
+class twoFactorFrame(BaseFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
 
+        self.attempts = 0
+        self.tfa = TwoFactorAuthentication()
+
+    def load_data(self):
+        from data_handler import load_twoFA_key
+
+        self.reset_frame()  
+
+        self.student = self.controller.current_user
+
+        self.secret_key = load_twoFA_key(self.student)
+
+        try:
+            if self.secret_key is None:
+                self.show_qr_code()
+            else:
+                self.hide_qr_code()
+
+        
+        except Exception as e:
+            return e
+
+    def show_qr_code(self):
+        from data_handler import save_twoFA_key
+
+        tk.Label(self.form, text= "Scan The QR Code", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        tk.Label(self.form, text= f"Your student ID is {self.student}").grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
+
+        self.qr_label = tk.Label(self.form)
+        self.qr_label.grid(row=2, column=4, columnspan=2)
+
+        self.secret_key = self.tfa.generate_user_key()
+
+        save_twoFA_key(self.student, self.secret_key)
+
+        self.display_qr_image(self.secret_key, self.student)
+
+        tk.Button(self.form, text="Log In", command=lambda: self.controller.show_frame(LoginFrame)).grid(row=4, column=4, columnspan=2)
+
+
+    def hide_qr_code(self):
+
+        tk.Label(self.form, text= "Enter The OTP", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+
+                # OTP entry (always reused)
+        self.code_entry = tk.Entry(self.form)
+        self.code_entry.grid(row=3, column=4, columnspan=2)
+
+        self.status_label = tk.Label(self.form, text="")
+        self.status_label.grid(row=5, column=4, columnspan=2)
+
+        tk.Button(self.form, text="Verify", command= self.on_verify).grid(row=4, column=4, columnspan=2)
+
+
+
+    def display_qr_image(self, key, student):
+        
+        self.qr_photo = self.tfa.display_qr_code(key, student)
+
+        self.qr_label.config(image= self.qr_photo)
+        self.qr_label.image = self.qr_photo
+
+    def on_verify(self):
+
+        code = self.code_entry.get().strip()
+        if self.tfa.verify_key(self.secret_key, code):
+
+            self.status_label.config(text= "Success!")
+
+            self.route_user()
+
+        else:
+
+            self.attempts += 1
+            self.status_label.config(text= "Incorrect Code")
+
+            if self.attempts >= 3:
+                self.status_label.config(text= "Too many attempts")
+                self.controller.show_frame(welcomeFrame)
+
+    def route_user(self):
+        
+        if self.controller.adminStatus == "Admin":
+            self.controller.show_frame(AdminFrame)
+
+        elif self.controller.adminStatus == "Student":
+            self.controller.show_frame(StudentFrame)
+
+    def reset_frame(self):
+        for widget in self.form.winfo_children():
+            widget.destroy()
+
+class welcomeFrame(BaseFrame):
+    def __init__(self, parent, controller):
+        super().__init__(parent, controller)
+
+        tk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
 
 #Create gui object
 app = AppGui()
