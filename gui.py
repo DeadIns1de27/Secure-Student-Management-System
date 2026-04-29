@@ -238,21 +238,29 @@ class RegisterFrame(BaseFrame):
         import student
         from security import hash_password
 
+        error = []
+
         #Check if the 2 password matches
         if self.confirmed.get().strip() != self.password.get().strip():
+            messagebox.showerror("Mismatched Passwords", "Passwords do not match. Please try again.")
             return
 
         #Check validation for name, email, phone, password
         if not v.validate_name(self.name.get().strip()):
-            return 
+            error.append("Name must only contain alphabetic characters. ")
         
         if not v.validate_email(self.email.get().strip()):
-            return
+            error.append("Email must only contain accepted domains (gmail.com/yahoo.com/ucmo.edu). ")
         
         if not v.validate_phone(self.phone_number.get().strip()):
-            return
+            error.append("Phone number must be in ###-###-#### format. ")
         
         if not v.validate_password(self.password.get().strip()):
+            error.append("Password must begin with a special character and be 6 - 12 characters long. ")
+
+        if error:
+            error_message = "\n".join(error)
+            messagebox.showerror("Invalid Registration", error_message)
             return
 
         #store the student records
