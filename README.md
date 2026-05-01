@@ -42,6 +42,7 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 * numpy
 * pyotp
 * qrcode
+* matplotlib
 
 
 
@@ -49,7 +50,7 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 
 ###### **How to Run Application**
 
-To run this application, you must first download all the necessary requirements. This includes sqlalchemy, numpy, pyotp, and qrcode. To launch this application, run the gui.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Users can log out using the log out button. Close the application by pressing the X in the top right corner.
+To run this application, you must first download all the necessary requirements. This includes sqlalchemy, numpy, pyotp, qrcode, and matplotlib. To launch this application, run the gui.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. Users will then have to use 2-factor authentication to finish the registering process. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Users can log out using the log out button. Close the application by pressing the X in the top right corner.
 
 
 
@@ -75,7 +76,7 @@ To run this application, you must first download all the necessary requirements.
 
 ###### main.py
 
-* Entry point that controls program flow.
+* Main file that controls program flow.
 
 
 
@@ -111,7 +112,7 @@ To run this application, you must first download all the necessary requirements.
 
 ###### data\_handler.py
 
-* This is the storage layer that will store the student record in a serverless database (SQLite). It has the following functions, save\_student, load\_student, update\_student, delete\_student, save\_password, load\_password, update\_password, delete\_password\_row, validate\_login, and getGradesArray.
+* This is the storage layer that will store the student record in a serverless database (SQLite). It has the following functions to save, load, edit, update, and delete students. Other functions it includes are save, load, update, and delete password. It has functions for validating logins, getting grade arrays, and getting grades.
 
 
 
