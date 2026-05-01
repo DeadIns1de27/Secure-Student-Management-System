@@ -33,7 +33,7 @@ class AppGui(tk.Tk):
 
         self.geometry("800x800")    #App window size
 
-        self.current_user = None
+        self.current_user = "700241678"
 
         self.adminStatus = None
 
@@ -57,7 +57,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(welcomeFrame)     #Default frame is login
+        self.show_frame(AdminFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
@@ -295,8 +295,9 @@ class RegisterFrame(BaseFrame):
 #Admin Page
 class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
-        super().__init__(parent, controller)
+        from student import gradeManager
 
+        super().__init__(parent, controller)
 
         ttk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, columnspan= 2, padx = 10, pady= 10)
 
@@ -322,6 +323,8 @@ class AdminFrame(BaseFrame):
         
         self.data_frame = tk.Frame(self.form, bd = 2, relief = "groove", padx = 10, pady = 10)
         self.data_frame.grid(row = 4, column = 0, columnspan = 2, padx = 10, pady= 10)
+
+        self.grade = gradeManager()
         
     def displayStudent(self):
 
@@ -339,6 +342,9 @@ class AdminFrame(BaseFrame):
             ttk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
             ttk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
             row += 1
+
+        ttk.Label(self.data_frame, text = "Average GPA:").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
+        ttk.Label(self.data_frame, text = round(self.grade.calculate_average(enteredID), 2)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
 
         self.currentData = student
 
@@ -428,8 +434,15 @@ class StudentFrame(BaseFrame):
 
     def load_data(self):
     #Get the student record
-        self.record = self.get_current_student() 
+        from student import gradeManager
+
+        self.grade = gradeManager()
+        self.record = self.get_current_student()
+        student = self.controller.current_user
         row = 1
+
+        ttk.Label(self.form, text="Average GPA:", width=20, anchor="w").grid(row=11, column=4, sticky="w", padx = 10, pady= 10)
+        ttk.Label(self.form, text=round(self.grade.calculate_average(student), 2)).grid(row=11, column=5, sticky="w", padx = 10, pady= 10)
 
         #Loop through all the records and display the label and the key
         for label, key in self.record.items():
@@ -442,6 +455,8 @@ class StudentFrame(BaseFrame):
             ttk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx = 10, pady= 10)
 
             row += 1
+        
+        print(row)
 
 class VisualizationFrame(BaseFrame):
     
@@ -573,3 +588,5 @@ class welcomeFrame(BaseFrame):
         ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 1, column = 2, columnspan=3, padx = 10, pady= 10)
         ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 1, column = 5, columnspan=3, padx = 10, pady= 10)
 
+app = AppGui()
+app.mainloop()
