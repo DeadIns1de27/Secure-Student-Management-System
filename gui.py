@@ -57,7 +57,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(welcomeFrame)     #Default frame is login
+        self.show_frame(AdminFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
@@ -328,6 +328,8 @@ class AdminFrame(BaseFrame):
         #Gets student data from database
         enteredID = self.entry.get()
         student = dh.load_student(enteredID)
+        if student == None:
+            messagebox.showerror("Error", "Student doesen't exist")
 
         #Clears old data
         for widget in self.data_frame.winfo_children():
@@ -461,15 +463,23 @@ class VisualizationFrame(BaseFrame):
 
     def showVisual(self):
 
-        
+        #Creates a figure
         fig = Figure(figsize = (5, 4), dpi = 100)
         ax = fig.add_subplot()
+
+        #Takes cleaned input and returns grades as array
         className = self.entry.get().lower().strip()
         arr = dh.getGradesArray(className)
         
+        #Checks if arr is empty
+        if arr == None:
+            messagebox.showerror("Error", "Class doesn't exist")
+
+        #Creates the histogram
         ax.hist(arr)
         ax.set_title("Grade Distribution")
 
+        #Turns matplotlib figure into tkinter widget
         canvas = FigureCanvasTkAgg(fig, master = self.form)
         canvas.draw()
         canvas.get_tk_widget().grid(row = 4, column = 1, padx = 10, pady= 10)
