@@ -1,6 +1,6 @@
 # **Secure-Student-Management-System**
 
-A professional-grade, modular Python application that serves as a secure repository for academic data. The features of this application include a GUI, data visualization with matplotlib, a SQL serverless database, 2-factor authentication, and salting.
+A professional-grade, modular Python application that serves as a secure repository for academic data. The features of this application include a GUI, data visualization with matplotlib, a SQL serverless database, two-factor authentication, and salting.
 
 
 
@@ -8,9 +8,10 @@ A professional-grade, modular Python application that serves as a secure reposit
 
 * Introduction
 * Additional Features List
-* Installation
+* Installation / Used Libraires 
 * Usage
 * File Descriptions
+* Contributors
 
 
 
@@ -27,7 +28,7 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 ###### **Additional Features**
 
 1. GUI with Tkinter
-2. Data Visualization
+2. Data Visualization with matplotlib
 3. SQL serverless database
 4. Two-Factor Authentication QR code
 5. Salting
@@ -36,13 +37,19 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 
 
 
-###### **Installation / Requirements**
+###### **Installation / Used Libraries**  
 
 * sqlalchemy
 * numpy
 * pyotp
 * qrcode
 * matplotlib
+* PIL
+* regex
+* os
+* tkinter
+* hashlib
+* hmac
 
 
 
@@ -50,7 +57,7 @@ The Secure-Student-Management-System is an application that focuses on a secure 
 
 ###### **How to Run Application**
 
-To run this application, you must first download all the necessary requirements. This includes sqlalchemy, numpy, pyotp, qrcode, and matplotlib. To launch this application, run the gui.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. Users will then have to use 2-factor authentication to finish the registering process. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Users can log out using the log out button. Close the application by pressing the X in the top right corner.
+To run this application, you must first download all the necessary installations if they are not already installed. To launch this application, run the main.py file. The application will then open a window. Users are able to select log in or register. New students can register and input their information to create an account. Users will then have to use 2-factor authentication to finish the registering process. If you are an existing user, you can enter your student ID and password. Once you register or log in, the students can view their records. If you are an admin, you will be able to edit, add, delete, or view student records. Users can log out using the log out button. Close the application by pressing the X in the top right corner.
 
 
 
@@ -76,7 +83,7 @@ To run this application, you must first download all the necessary requirements.
 
 ###### main.py
 
-* Main file that controls program flow.
+* Main file that controls program flow. The main file is used to initiate the program.
 
 
 
@@ -94,7 +101,7 @@ To run this application, you must first download all the necessary requirements.
 
 ###### student.py
 
-* Student will define data objects for students, including a unique 700 number, name, age(16-100), gender, and phone number. Defines the grade manager to perform calculations. For example, calculate\_average.
+* Student will define data objects for students, including a unique 700 number, name, age(16-100), gender, and phone number. Defines the grade manager to perform calculations. For example, calculate\_average to find GPA.
 
 
 
@@ -125,4 +132,12 @@ To run this application, you must first download all the necessary requirements.
 ###### two\_factor\_authentication.py
 
 * The two-factor authentication file uses Google Authenticator via the pyotp library. Included in this file are the following functions: generate\_user\_key, display\_qr\_code, and verify\_key.
+
+
+
+
+
+###### Contributors
+
+Marcus Jian Shen Chow, Jacob Miller, Zach Brown, Lilly Mitchell
 
