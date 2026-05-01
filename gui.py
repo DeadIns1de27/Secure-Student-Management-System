@@ -8,6 +8,7 @@ Should Include:
 """
 
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 
 import validator as v
@@ -32,7 +33,7 @@ class AppGui(tk.Tk):
 
         self.title("Secure Student Management System")  #App window title
 
-        self.geometry("800x600")    #App window size
+        self.geometry("800x800")    #App window size
 
         self.current_user = None
 
@@ -58,7 +59,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
+        self.show_frame(welcomeFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
@@ -122,6 +123,14 @@ class BaseFrame(tk.Frame):
     def get_current_student(self):
         from data_handler import load_student
         return load_student(self.controller.current_user)
+    
+    def create_back_button(self, target_frame):
+
+        ttk.Button(self.form, text="← Back", command=lambda: self.controller.show_frame(target_frame)).grid(row=99, column=0, padx=10, pady=10, sticky="w")
+    
+    def reset_frame(self):
+        for widget in self.form.winfo_children():
+            widget.destroy()
 
 
 #Login Frame
@@ -129,24 +138,23 @@ class LoginFrame(BaseFrame):
     def __init__(self, parent, controller): 
         super().__init__(parent, controller)
 
+        self.create_back_button(welcomeFrame)
+
         # label of title
-        tk.Label(self.form, text ="Login", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
+        ttk.Label(self.form, text ="Login", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
         
         # Label and entry box for student id
-        tk.Label(self.form, text="Student ID").grid(row= 2, column= 4)
-        self.studentID = tk.Entry(self.form, validate="key", validatecommand=self.digit_validator())
-        self.studentID.grid(row= 3, column= 4)
+        ttk.Label(self.form, text="Student ID").grid(row= 2, column= 4, padx = 10)
+        self.studentID = ttk.Entry(self.form, validate="key", validatecommand=self.digit_validator())
+        self.studentID.grid(row= 3, column= 4, padx = 10, pady= 10)
 
         # Label and entry box for password
-        tk.Label(self.form, text="Password").grid(row= 5, column= 4)
-        self.password = tk.Entry(self.form, show= "*")
-        self.password.grid(row= 6, column= 4)
+        ttk.Label(self.form, text="Password").grid(row= 5, column= 4, padx = 10)
+        self.password = ttk.Entry(self.form, show= "*")
+        self.password.grid(row= 6, column= 4, padx = 10, pady= 10)
 
         #Button to confirm login
-        tk.Button(self.form, text="Login", command= self.login).grid(row= 7, column= 4, pady= 10)
-
-        #Button to register a new account
-        tk.Button(self.form, text="Register Account", command= lambda: self.controller.show_frame(RegisterFrame)).grid(row= 8, column= 4, pady= 5)
+        ttk.Button(self.form, padding= (5, 7), text="Login", command= self.login).grid(row= 7, column= 4, padx = 10, pady= 10)
 
     # Function to check the login status
     def login(self):
@@ -188,47 +196,49 @@ class RegisterFrame(BaseFrame):
 
         super().__init__(parent, controller)
 
+        self.create_back_button(welcomeFrame)
+
         #Label for title
-        tk.Label(self.form, text ="Register", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
+        ttk.Label(self.form, text ="Register", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
 
         #Label and entry for name
-        tk.Label(self.form, text="Name").grid(row= 2, column= 4)
-        self.name = tk.Entry(self.form)
-        self.name.grid(row= 3, column= 4)
+        ttk.Label(self.form, text="Name").grid(row= 2, column= 4, padx = 10)
+        self.name = ttk.Entry(self.form)
+        self.name.grid(row= 3, column= 4, padx = 10, pady= 10)
 
         #label and entry for age
-        tk.Label(self.form, text="Age").grid(row= 5, column= 4)
-        self.age = tk.Entry(self.form, validate="key", validatecommand= self.digit_validator())
-        self.age.grid(row= 6, column= 4)
+        ttk.Label(self.form, text="Age").grid(row= 5, column= 4, padx = 10)
+        self.age = ttk.Entry(self.form, validate="key", validatecommand= self.digit_validator())
+        self.age.grid(row= 6, column= 4, padx = 10, pady= 10)
 
         #label and entry for gender
-        tk.Label(self.form, text="Gender").grid(row= 7, column= 4)
-        self.gender = tk.Entry(self.form)
-        self.gender.grid(row= 8, column= 4)
+        ttk.Label(self.form, text="Gender").grid(row= 7, column= 4, padx = 10)
+        self.gender = ttk.Entry(self.form)
+        self.gender.grid(row= 8, column= 4, padx = 10, pady= 10)
 
         #label and entry for phone number
-        tk.Label(self.form, text="Phone Number").grid(row= 9, column= 4)
-        self.phone_number = tk.Entry(self.form, validate="key", validatecommand= self.digit_validator)
+        ttk.Label(self.form, text="Phone Number").grid(row= 9, column= 4, padx = 10)
+        self.phone_number = ttk.Entry(self.form, validate="key", validatecommand= self.digit_validator)
         self.phone_number.bind("<KeyRelease>", self.on_phone_change)
-        self.phone_number.grid(row= 10, column= 4)
+        self.phone_number.grid(row= 10, column= 4, padx = 10, pady= 10)
 
         #label and entry for email
-        tk.Label(self.form, text="Email").grid(row= 11, column= 4)
-        self.email = tk.Entry(self.form)
-        self.email.grid(row= 12, column= 4)
+        ttk.Label(self.form, text="Email").grid(row= 11, column= 4, padx = 10)
+        self.email = ttk.Entry(self.form)
+        self.email.grid(row= 12, column= 4, padx = 10, pady= 10)
 
         #label and entry for password
-        tk.Label(self.form, text="Password").grid(row= 13, column= 4)
-        self.password = tk.Entry(self.form, show= "*")
-        self.password.grid(row= 14, column= 4)
+        ttk.Label(self.form, text="Password").grid(row= 13, column= 4, padx = 10)
+        self.password = ttk.Entry(self.form, show= "*")
+        self.password.grid(row= 14, column= 4, padx = 10, pady= 10)
 
         #label and entry for password confirmation
-        tk.Label(self.form, text="Confirm Password").grid(row= 15, column= 4)
-        self.confirmed = tk.Entry(self.form, show= "*")
-        self.confirmed.grid(row= 16, column= 4)
+        ttk.Label(self.form, text="Confirm Password").grid(row= 15, column= 4, padx = 10)
+        self.confirmed = ttk.Entry(self.form, show= "*")
+        self.confirmed.grid(row= 16, column= 4, padx = 10, pady= 10)
 
         #Button to register student info
-        tk.Button(self.form, text="Register Now", command= lambda: self.register_info()).grid(row= 17, column= 4, pady= 10)
+        ttk.Button(self.form, text="Register Now", padding= (7, 10), command= lambda: self.register_info()).grid(row= 17, column= 4, padx = 10, pady= 10)
 
     #function ran when register button is pressed
     def register_info(self):
@@ -289,32 +299,32 @@ class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        tk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, pady = 10)
 
-        tk.Label(self.form, text = "Enter Student ID").grid(row = 1, column = 0, padx = 10)
+        ttk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, columnspan= 2, padx = 10, pady= 10)
 
-        self.entry = tk.Entry(self.form)
-        self.entry.grid(row = 2, column = 0)
+        ttk.Label(self.form, text = "Enter Student ID").grid(row = 1, column = 0, padx = 10, pady= 10)
 
-        tk.Button(self.form, text = "Submit", command = self.displayStudent).grid(row = 2, column = 1, sticky = "w")
+        self.entry = ttk.Entry(self.form)
+        self.entry.grid(row = 2, column = 0, padx = 10, pady= 10)
 
-        self.editButton = tk.Button(self.form, text = "Edit", command = self.editStudent)
-        self.editButton.grid(row = 7, column = 1, pady = 10)
+        ttk.Button(self.form, padding= (5, 7), text = "Submit", command = self.displayStudent).grid(row = 2, column = 1, sticky = "w", padx = 10, pady= 10)
+
+        self.editButton = ttk.Button(self.form, padding= (5, 7), text = "Edit", command = self.editStudent)
+        self.editButton.grid(row = 5, column = 1, padx = 10, pady= 10)
         self.editButton.grid_remove()
 
-        self.deleteButton = tk.Button(self.form, text = "Delete", command = self.deleteStudent)
-        self.deleteButton.grid(row = 3, column = 1, sticky = "w")
+        self.deleteButton = ttk.Button(self.form, padding= (5, 7), text = "Delete", command = self.deleteStudent)
+        self.deleteButton.grid(row = 3, column = 1, sticky = "w", padx = 10, pady= 10)
         self.deleteButton.grid_remove()
 
-        tk.Button(self.form, text = "Visualization", command = lambda: self.controller.show_frame(VisualizationFrame)).grid(row = 4, column = 1)
+        ttk.Button(self.form, padding= (5, 7), text = "Visualization", command = lambda: self.controller.show_frame(VisualizationFrame)).grid(row = 5, column = 0, padx = 10, pady= 10)
 
         #Button to log out
-        tk.Button(self.form, text="Log Out", command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
+        ttk.Button(self.form, text="Log Out", padding=(5, 7), command= lambda: self.controller.show_frame(LoginFrame)).grid(row = 6, column = 0, padx = 10, pady = 10)
         
         self.data_frame = tk.Frame(self.form, bd = 2, relief = "groove", padx = 10, pady = 10)
-        self.data_frame.grid(row = 4, column = 0, columnspan = 2, pady = 10)
+        self.data_frame.grid(row = 4, column = 0, columnspan = 2, padx = 10, pady= 10)
         
-
     def displayStudent(self):
 
         #Gets student data from database
@@ -328,8 +338,8 @@ class AdminFrame(BaseFrame):
         #Displays student data
         row = 0
         for key, value in student.items():
-            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
-            tk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
+            ttk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
+            ttk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
             row += 1
 
         self.currentData = student
@@ -347,11 +357,11 @@ class AdminFrame(BaseFrame):
 
         row = 0
         for key, value in self.currentData.items():
-            tk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w")
+            ttk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 10, pady= 10)
 
-            entry = tk.Entry(self.data_frame)
+            entry = ttk.Entry(self.data_frame)
             entry.insert(0, str(value))
-            entry.grid(row = row, column = 1, sticky = "w")
+            entry.grid(row = row, column = 1, sticky = "w", padx = 10, pady= 10)
 
             self.edit_entries[key] = entry
             row += 1
@@ -413,8 +423,8 @@ class StudentFrame(BaseFrame):
         super().__init__(parent, controller)
 
         #Create Student Page Label
-        tk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
-        tk.Button(self.form, text= "Log Out", command=lambda: self.controller.show_frame(LoginFrame)).grid(row= 20, column= 4, columnspan=2, padx= 10, pady= 10)
+        ttk.Label(self.form, text ="Student Page", font = LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)        
+        ttk.Button(self.form, padding= (5, 7), text= "Log Out", command=lambda: self.controller.show_frame(LoginFrame)).grid(row= 20, column= 4, columnspan=2, padx= 10, pady= 10)
 
     #Function that loads user ID from login
 
@@ -429,9 +439,9 @@ class StudentFrame(BaseFrame):
             if label == "adminStatus":
                 continue
 
-            tk.Label(self.form, text=f"{label}:", width=20, anchor="w").grid(row=row, column=4, sticky="w", padx= 5, pady= 5)
+            ttk.Label(self.form, text=f"{label}:", width=20, anchor="w").grid(row=row, column=4, sticky="w", padx = 10, pady= 10)
 
-            tk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx= 5, pady= 5)
+            ttk.Label(self.form, text= key).grid(row=row, column=5, sticky="w", padx = 10, pady= 10)
 
             row += 1
 
@@ -440,21 +450,23 @@ class VisualizationFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        tk.Label(self.form, text = "Data Visualization", font = LARGEFONT).grid(row = 0, column = 1)
+        self.create_back_button(AdminFrame)
 
-        tk.Label(self.form, text = "Enter Class Name").grid(row = 1, column = 1)
+        ttk.Label(self.form, text = "Data Visualization", font = LARGEFONT).grid(row = 0, column = 1, padx = 10, pady= 10)
 
-        self.entry = tk.Entry(self.form)
-        self.entry.grid(row = 2, column = 1)
+        ttk.Label(self.form, text = "Enter Class Name").grid(row = 1, column = 1, padx = 10, pady= 10)
 
-        tk.Button(self.form, text = "Submit", command = self.showVisual).grid(row = 2, column = 2)
+        self.entry = ttk.Entry(self.form)
+        self.entry.grid(row = 2, column = 1, padx = 10, pady= 10)
+
+        ttk.Button(self.form, text = "Submit", command = self.showVisual).grid(row = 2, column = 2, padx = 10, pady= 10)
 
     def showVisual(self):
 
         
         fig = Figure(figsize = (5, 4), dpi = 100)
         ax = fig.add_subplot()
-        className = self.entry.get()
+        className = self.entry.get().lower().strip()
         arr = dh.getGradesArray(className)
         
         ax.hist(arr)
@@ -462,7 +474,7 @@ class VisualizationFrame(BaseFrame):
 
         canvas = FigureCanvasTkAgg(fig, master = self.form)
         canvas.draw()
-        canvas.get_tk_widget().grid(row = 4, column = 1)
+        canvas.get_tk_widget().grid(row = 4, column = 1, padx = 10, pady= 10)
 
 class twoFactorFrame(BaseFrame):
     def __init__(self, parent, controller):
@@ -473,7 +485,6 @@ class twoFactorFrame(BaseFrame):
 
     def load_data(self):
         from data_handler import load_twoFA_key
-        print(self.controller.current_user)
         self.reset_frame()  
 
         self.student = self.controller.current_user
@@ -493,11 +504,11 @@ class twoFactorFrame(BaseFrame):
     def show_qr_code(self):
         from data_handler import save_twoFA_key
 
-        tk.Label(self.form, text= "Scan The QR Code", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
-        tk.Label(self.form, text= f"Your student ID is {self.student}").grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Label(self.form, text= "Scan The QR Code", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Label(self.form, font=(15), text= f"Your student ID is {self.student}").grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
 
-        self.qr_label = tk.Label(self.form)
-        self.qr_label.grid(row=2, column=4, columnspan=2)
+        self.qr_label = ttk.Label(self.form)
+        self.qr_label.grid(row=2, column=4, columnspan=2, padx = 10, pady= 10)
 
         self.secret_key = self.tfa.generate_user_key()
 
@@ -505,21 +516,21 @@ class twoFactorFrame(BaseFrame):
 
         self.display_qr_image(self.secret_key, self.student)
 
-        tk.Button(self.form, text="Log In", command=lambda: self.controller.show_frame(LoginFrame)).grid(row=4, column=4, columnspan=2)
+        ttk.Button(self.form, padding=(5, 7), text="Log In", command=lambda: self.controller.show_frame(LoginFrame)).grid(row=4, column=4, columnspan=2, padx = 10, pady= 10)
 
 
     def hide_qr_code(self):
 
-        tk.Label(self.form, text= "Enter The OTP", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Label(self.form, text= "Enter The OTP", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
 
                 # OTP entry (always reused)
-        self.code_entry = tk.Entry(self.form)
-        self.code_entry.grid(row=3, column=4, columnspan=2)
+        self.code_entry = ttk.Entry(self.form)
+        self.code_entry.grid(row=3, column=4, columnspan=2, padx = 10, pady= 10)
 
-        self.status_label = tk.Label(self.form, text="")
-        self.status_label.grid(row=5, column=4, columnspan=2)
+        self.status_label = ttk.Label(self.form, text="")
+        self.status_label.grid(row=5, column=4, columnspan=2, padx = 10, pady= 10)
 
-        tk.Button(self.form, text="Verify", command= self.on_verify).grid(row=4, column=4, columnspan=2)
+        ttk.Button(self.form, padding=(5,7), text="Verify", command= self.on_verify).grid(row=4, column=4, columnspan=2, padx = 10, pady= 10)
 
 
 
@@ -555,17 +566,12 @@ class twoFactorFrame(BaseFrame):
 
         elif self.controller.adminStatus == "Student":
             self.controller.show_frame(StudentFrame)
-
-    def reset_frame(self):
-        for widget in self.form.winfo_children():
-            widget.destroy()
-
+            
 class welcomeFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        tk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 1, column = 2, columnspan=3, padx = 10, pady= 10)
+        ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 1, column = 5, columnspan=3, padx = 10, pady= 10)
 
-#Create gui object
-app = AppGui()
-app.mainloop()
