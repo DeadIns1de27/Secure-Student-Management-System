@@ -438,6 +438,7 @@ class AdminFrame(BaseFrame):
         studentID = self.currentData["studentID"]
 
         dh.delete_student(studentID)
+        dh.delete_password_row(studentID)
 
         #Clear frame
         for widget in self.data_frame.winfo_children():
