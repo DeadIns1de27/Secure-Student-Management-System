@@ -182,6 +182,7 @@ class LoginFrame(BaseFrame):
 
         elif self.controller.adminStatus == "Locked":
             messagebox.showerror("Account Locked", "Too many failed login attempts.")
+            self.controller.show_frame(welcomeFrame)
             return
 
         else:
@@ -255,7 +256,7 @@ class RegisterFrame(BaseFrame):
 
         #Check validation for name, email, phone, password
         if not v.validate_name(self.name.get().strip()):
-            error.append("Name must only contain alphabetic characters. ")
+            error.append("Name initials must be capitalized. ")
         
         if not v.validate_email(self.email.get().strip()):
             error.append("Email must only contain accepted domains (gmail.com/yahoo.com/ucmo.edu). ")
@@ -364,6 +365,10 @@ class AdminFrame(BaseFrame):
 
         row = 0
         for key, value in self.currentData.items():
+
+            if key == "studentID":
+                continue
+
             ttk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 10, pady= 10)
 
             entry = ttk.Entry(self.data_frame)
@@ -459,7 +464,6 @@ class StudentFrame(BaseFrame):
 
             row += 1
         
-        print(row)
 
 class VisualizationFrame(BaseFrame):
     
@@ -488,7 +492,7 @@ class VisualizationFrame(BaseFrame):
         arr = dh.getGradesArray(className)
         
         #Checks if arr is empty
-        if arr == None:
+        if arr is None:
             messagebox.showerror("Error", "Class doesn't exist")
             return None
 
