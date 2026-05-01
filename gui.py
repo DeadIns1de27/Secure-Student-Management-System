@@ -12,12 +12,10 @@ from tkinter import ttk
 from tkinter import messagebox
 
 import validator as v
-import student as s
 import data_handler as dh
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from two_factor_authentication import TwoFactorAuthentication
-import session_manager as sm
 from session_manager import SessionManager
 
 #Font and size for titles

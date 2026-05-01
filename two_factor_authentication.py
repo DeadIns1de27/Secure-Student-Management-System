@@ -22,8 +22,7 @@ If they fail three times, return false
 #import pyotp and qrcode
 import pyotp
 import qrcode
-import io
-from PIL import Image, ImageTk
+from PIL import ImageTk
 
 #TwoFactorAuthentication() Class
 class TwoFactorAuthentication():

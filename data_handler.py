@@ -2,7 +2,7 @@
 Storage Layer:
 
 sqlalchemy used to store data objects in 
-a serverless data base (sqlite) titled database.db
+a serverless database (sqlite) titled database.db
 '''
 
 #Import sqlalchemy
@@ -12,12 +12,6 @@ from sqlalchemy.exc import IntegrityError
 
 #Import password hash verification
 from security import verify_password
-
-#Import Data Layer
-from student import StudentRecord
-
-#Import security Layer
-from security import hash_password
 
 #Sets databases file location
 import os

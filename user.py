@@ -10,7 +10,6 @@ Will include the Admin class.
 
 Will include the StudentUser class.
 - Defines a student to VIEW only access to their record
-
 '''
 
 #import StudentRecord
