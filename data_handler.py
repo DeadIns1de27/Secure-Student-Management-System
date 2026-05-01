@@ -275,11 +275,13 @@ def delete_password_row(student_id):
 #Adds a key to the database
 def save_twoFA_key(student_id, key):
     session = Session()
-
+    
+    #Find the student id column for 2fa key
     try:
         query = sa.select(StudentCredentials).where(StudentCredentials.studentID == student_id)
         row = session.execute(query).scalar_one_or_none()
 
+        #Check if key already exist
         if row is None:
             return None
         
@@ -300,10 +302,12 @@ def save_twoFA_key(student_id, key):
 def load_twoFA_key(student_id):
     session = Session()
 
+    #Find the student id column for 2fa key
     try:
         query = sa.select(StudentCredentials.twoFA_key).where(StudentCredentials.studentID == student_id)
         row = session.execute(query).scalar_one_or_none()
 
+        #Check if key exist
         if row is None:
             return None
         
@@ -348,10 +352,13 @@ def validate_login(student_id, input_password) -> str:
     finally:
         session.close()
 
+#Get the students grades from the database
 def getGrades(student_id, class_subject: str):
     session = Session()
-    class_subject = class_subject.lower().strip()
+    class_subject = class_subject.lower().strip()   #make the subject all lowercase and remove whitespace
     try:
+
+        #Switch case between 3 different classes
         match class_subject:
             case "math":
                 query = sa.select(StudentTable.mathGrade).where(StudentTable.studentID == student_id)
@@ -373,6 +380,7 @@ def getGrades(student_id, class_subject: str):
     finally:
         session.close()
 
+#Get the student grades as array for visualization
 def getGradesArray(className: str):
 
     session = Session()
@@ -402,4 +410,6 @@ def getGradesArray(className: str):
     finally:
         session.close()
 
-getGradesArray("math")
+#testing
+if __name__ == "__main__":
+    getGradesArray("math")

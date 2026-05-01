@@ -33,9 +33,9 @@ class AppGui(tk.Tk):
 
         self.geometry("800x800")    #App window size
 
-        self.current_user = None
+        self.current_user = None    #stores current user id
 
-        self.adminStatus = None
+        self.adminStatus = None     #stores id admin status
 
         #Create a container to store the different frames being displayed
         container = tk.Frame(self)
@@ -57,14 +57,15 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(welcomeFrame)     #Default frame is login
+        self.show_frame(welcomeFrame)     #Default frame is welcome page
 
-        self.session_manager = SessionManager()
+        self.session_manager = SessionManager()     #Track the login session
 
     # to display the current frame passed as parameter
     def show_frame(self, cont):
         frame = self.frames[cont]
 
+        #if frame has function load_data, run it
         if hasattr(frame, "load_data"):
             frame.load_data()
 
@@ -108,7 +109,7 @@ class BaseFrame(tk.Frame):
         else:
             return f"{digits[:3]}-{digits[3:6]}-{digits[6:]}"
         
-    #Event handler that
+    #Event handler that checks user input
     def on_phone_change(self, event):
 
         value = self.phone_number.get()
@@ -118,14 +119,16 @@ class BaseFrame(tk.Frame):
         self.phone_number.delete(0, "end")
         self.phone_number.insert(0, formatted)
 
+    #get the user record from the database
     def get_current_student(self):
         from data_handler import load_student
         return load_student(self.controller.current_user)
     
+    #Creates a back button at the bottom left of the frame
     def create_back_button(self, target_frame):
-
         ttk.Button(self.form, text="← Back", command=lambda: self.controller.show_frame(target_frame)).grid(row=99, column=0, padx=10, pady=10, sticky="w")
     
+    #clears the widgets in the frame
     def reset_frame(self):
         for widget in self.form.winfo_children():
             widget.destroy()
@@ -136,7 +139,7 @@ class LoginFrame(BaseFrame):
     def __init__(self, parent, controller): 
         super().__init__(parent, controller)
 
-        self.create_back_button(welcomeFrame)
+        self.create_back_button(welcomeFrame)   #back button
 
         # label of title
         ttk.Label(self.form, text ="Login", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
@@ -195,7 +198,7 @@ class RegisterFrame(BaseFrame):
 
         super().__init__(parent, controller)
 
-        self.create_back_button(welcomeFrame)
+        self.create_back_button(welcomeFrame)   #back button
 
         #Label for title
         ttk.Label(self.form, text ="Register", font = LARGEFONT).grid(row= 0, column= 4, padx= 10, pady= 10)
@@ -297,26 +300,30 @@ class RegisterFrame(BaseFrame):
 class AdminFrame(BaseFrame):
     def __init__(self, parent, controller):
         from student import gradeManager
-
         super().__init__(parent, controller)
 
+        #Title label
         ttk.Label(self.form, text ="Admin Page", font = LARGEFONT).grid(row = 0, column = 0, columnspan= 2, padx = 10, pady= 10)
 
+        #Student Id entry
         ttk.Label(self.form, text = "Enter Student ID").grid(row = 1, column = 0, padx = 10, pady= 10)
-
         self.entry = ttk.Entry(self.form)
         self.entry.grid(row = 2, column = 0, padx = 10, pady= 10)
 
+        #submit button
         ttk.Button(self.form, padding= (5, 7), text = "Submit", command = self.displayStudent).grid(row = 2, column = 1, sticky = "w", padx = 10, pady= 10)
 
+        #Edit button
         self.editButton = ttk.Button(self.form, padding= (5, 7), text = "Edit", command = self.editStudent)
         self.editButton.grid(row = 5, column = 1, padx = 10, pady= 10)
         self.editButton.grid_remove()
 
+        #delete button
         self.deleteButton = ttk.Button(self.form, padding= (5, 7), text = "Delete", command = self.deleteStudent)
         self.deleteButton.grid(row = 3, column = 1, sticky = "w", padx = 10, pady= 10)
         self.deleteButton.grid_remove()
 
+        #Visualization button
         ttk.Button(self.form, padding= (5, 7), text = "Visualization", command = lambda: self.controller.show_frame(VisualizationFrame)).grid(row = 5, column = 0, padx = 10, pady= 10)
 
         #Button to log out
@@ -327,6 +334,7 @@ class AdminFrame(BaseFrame):
 
         self.grade = gradeManager()
         
+    #Displays student info
     def displayStudent(self):
 
         #Gets student data from database
@@ -347,6 +355,7 @@ class AdminFrame(BaseFrame):
             ttk.Label(self.data_frame, text = str(value)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
             row += 1
 
+        #Shows student average gpa across 3 subjects
         ttk.Label(self.data_frame, text = "Average GPA:").grid(row = row, column = 0, sticky = "w", padx = 5, pady = 2)
         ttk.Label(self.data_frame, text = round(self.grade.calculate_average(enteredID), 2)).grid(row = row, column = 1, sticky = "w", padx = 5, pady = 2)
 
@@ -355,6 +364,7 @@ class AdminFrame(BaseFrame):
         self.editButton.grid()
         self.deleteButton.grid()
 
+    #edit student details
     def editStudent(self):
 
         #Clear frame
@@ -363,10 +373,11 @@ class AdminFrame(BaseFrame):
 
         self.edit_entries = {}
 
+        #Loop through the student record to edit
         row = 0
         for key, value in self.currentData.items():
 
-            if key == "studentID":
+            if key == "studentID":      #Cant edit student ID
                 continue
 
             ttk.Label(self.data_frame, text = f"{key}").grid(row = row, column = 0, sticky = "w", padx = 10, pady= 10)
@@ -378,8 +389,10 @@ class AdminFrame(BaseFrame):
             self.edit_entries[key] = entry
             row += 1
 
+        #Save edit button
         self.editButton.config(text = "Save", command = self.saveStudent)
 
+    #Save edited info into database
     def saveStudent(self):
         studentID = self.currentData["studentID"]
 
@@ -419,6 +432,7 @@ class AdminFrame(BaseFrame):
 
         self.editButton.config(text = "Edit", command = self.editStudent)
 
+    #Delete entire student record from database
     def deleteStudent(self):
 
         studentID = self.currentData["studentID"]
@@ -439,7 +453,6 @@ class StudentFrame(BaseFrame):
         ttk.Button(self.form, padding= (5, 7), text= "Log Out", command=lambda: self.controller.show_frame(LoginFrame)).grid(row= 20, column= 4, columnspan=2, padx= 10, pady= 10)
 
     #Function that loads user ID from login
-
     def load_data(self):
     #Get the student record
         from student import gradeManager
@@ -464,23 +477,28 @@ class StudentFrame(BaseFrame):
 
             row += 1
         
-
+#Grade Visualization frame
 class VisualizationFrame(BaseFrame):
     
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        self.create_back_button(AdminFrame)
+        self.create_back_button(AdminFrame) #back button
 
+        #label for Data Visualization
         ttk.Label(self.form, text = "Data Visualization", font = LARGEFONT).grid(row = 0, column = 1, padx = 10, pady= 10)
 
+        #Label for class name
         ttk.Label(self.form, text = "Enter Class Name").grid(row = 1, column = 1, padx = 10, pady= 10)
 
+        #Entry box for class name
         self.entry = ttk.Entry(self.form)
         self.entry.grid(row = 2, column = 1, padx = 10, pady= 10)
 
+        #confirm classname
         ttk.Button(self.form, text = "Submit", command = self.showVisual).grid(row = 2, column = 2, padx = 10, pady= 10)
-
+    
+    #Displays graph
     def showVisual(self):
 
         #Creates a figure
@@ -505,64 +523,75 @@ class VisualizationFrame(BaseFrame):
         canvas.draw()
         canvas.get_tk_widget().grid(row = 4, column = 1, padx = 10, pady= 10)
 
+
+#2 Factor Authentication frame
 class twoFactorFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        self.attempts = 0
+        self.attempts = 0       #Tracks OTP attempts
         self.tfa = TwoFactorAuthentication()
 
+    #Runs immediately upon show frame
     def load_data(self):
         from data_handler import load_twoFA_key
-        self.reset_frame()  
+        self.reset_frame()      #Clear widgets from previous use
 
-        self.student = self.controller.current_user
+        self.student = self.controller.current_user     #store student id
 
-        self.secret_key = load_twoFA_key(self.student)
+        self.secret_key = load_twoFA_key(self.student)  #get student 2fa key from database
 
+        #if no key, means initial setup, if has key, means normal login
         try:
             if self.secret_key is None:
                 self.show_qr_code()
             else:
                 self.hide_qr_code()
 
-        
         except Exception as e:
             return e
 
+    #Initial Setup
     def show_qr_code(self):
         from data_handler import save_twoFA_key
 
+        #Label for frame
         ttk.Label(self.form, text= "Scan The QR Code", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
+
+        #Displays the student id that was generated
         ttk.Label(self.form, font=(15), text= f"Your student ID is {self.student}").grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
 
+        #Create Qr Code label to display image
         self.qr_label = ttk.Label(self.form)
         self.qr_label.grid(row=2, column=4, columnspan=2, padx = 10, pady= 10)
 
-        self.secret_key = self.tfa.generate_user_key()
+        self.secret_key = self.tfa.generate_user_key()      #Generate a 2fa key
 
-        save_twoFA_key(self.student, self.secret_key)
+        save_twoFA_key(self.student, self.secret_key)       #save the key to the database
 
-        self.display_qr_image(self.secret_key, self.student)
+        self.display_qr_image(self.secret_key, self.student)    #Display the qr code
 
+        #Switches frame to log in
         ttk.Button(self.form, padding=(5, 7), text="Log In", command=lambda: self.controller.show_frame(LoginFrame)).grid(row=4, column=4, columnspan=2, padx = 10, pady= 10)
 
-
+    #Normal login procedure
     def hide_qr_code(self):
-
+        
+        #Label for normal login
         ttk.Label(self.form, text= "Enter The OTP", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
 
-                # OTP entry (always reused)
+        # OTP entry 
         self.code_entry = ttk.Entry(self.form)
         self.code_entry.grid(row=3, column=4, columnspan=2, padx = 10, pady= 10)
 
+        # otp entry status
         self.status_label = ttk.Label(self.form, text="")
         self.status_label.grid(row=5, column=4, columnspan=2, padx = 10, pady= 10)
 
+        #Verify if the otp is correct
         ttk.Button(self.form, padding=(5,7), text="Verify", command= self.on_verify).grid(row=4, column=4, columnspan=2, padx = 10, pady= 10)
 
-
-
+    #Displays the actual image
     def display_qr_image(self, key, student):
         
         self.qr_photo = self.tfa.display_qr_code(key, student)
@@ -570,6 +599,7 @@ class twoFactorFrame(BaseFrame):
         self.qr_label.config(image= self.qr_photo)
         self.qr_label.image = self.qr_photo
 
+    #Runs the verification for otp and key linked to student id
     def on_verify(self):
 
         code = self.code_entry.get().strip()
@@ -577,10 +607,11 @@ class twoFactorFrame(BaseFrame):
 
             self.status_label.config(text= "Success!")
 
-            self.route_user()
+            self.route_user()   #Route user to either student frame or admin frame
 
         else:
-
+            
+            #Tracks attemps for otp
             self.attempts += 1
             self.status_label.config(text= "Incorrect Code")
 
@@ -588,6 +619,7 @@ class twoFactorFrame(BaseFrame):
                 self.status_label.config(text= "Too many attempts")
                 self.controller.show_frame(welcomeFrame)
 
+    #Route user based on their admin status
     def route_user(self):
 
         if self.controller.adminStatus == "Admin":
@@ -595,15 +627,18 @@ class twoFactorFrame(BaseFrame):
 
         elif self.controller.adminStatus == "Student":
             self.controller.show_frame(StudentFrame)
-            
+
+#Welcome Frame (Initial Frame)     
 class welcomeFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
+        #Label and button
         ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
         ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 3, column = 2, columnspan=3, padx = 10, pady= 10)
         ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 3, column = 5, columnspan=3, padx = 10, pady= 10)
 
+        #Image
         full_sized_image = tk.PhotoImage(file = "UCMlogo.png")
         self.ucm_logo = full_sized_image.subsample(x = 5, y = 5)
         ttk.Label(self.form, image = self.ucm_logo).grid(row = 2, column = 4, columnspan = 2, padx = 10, pady = 10)
