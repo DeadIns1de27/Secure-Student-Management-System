@@ -57,7 +57,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
+        self.show_frame(welcomeFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
