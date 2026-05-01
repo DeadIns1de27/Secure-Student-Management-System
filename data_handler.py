@@ -387,7 +387,7 @@ def getGradesArray(className: str):
             case "science":
                 query = StudentTable.scienceGrade
             case _:
-                print("No subject found")
+                return None
 
         rows = session.query(query).all()
 

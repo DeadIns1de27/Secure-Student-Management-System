@@ -33,7 +33,7 @@ class AppGui(tk.Tk):
 
         self.geometry("800x800")    #App window size
 
-        self.current_user = "700241678"
+        self.current_user = None
 
         self.adminStatus = None
 
@@ -57,7 +57,7 @@ class AppGui(tk.Tk):
  
             frame.grid(row = 0, column = 0, sticky ="nsew")
  
-        self.show_frame(AdminFrame)     #Default frame is login
+        self.show_frame(welcomeFrame)     #Default frame is login
 
         self.session_manager = SessionManager()
 
@@ -331,6 +331,9 @@ class AdminFrame(BaseFrame):
         #Gets student data from database
         enteredID = self.entry.get()
         student = dh.load_student(enteredID)
+        if student == None:
+            messagebox.showerror("Error", "Student doesen't exist")
+            return None
 
         #Clears old data
         for widget in self.data_frame.winfo_children():
@@ -476,15 +479,24 @@ class VisualizationFrame(BaseFrame):
 
     def showVisual(self):
 
-        
+        #Creates a figure
         fig = Figure(figsize = (5, 4), dpi = 100)
         ax = fig.add_subplot()
+
+        #Takes cleaned input and returns grades as array
         className = self.entry.get().lower().strip()
         arr = dh.getGradesArray(className)
         
+        #Checks if arr is empty
+        if arr == None:
+            messagebox.showerror("Error", "Class doesn't exist")
+            return None
+
+        #Creates the histogram
         ax.hist(arr)
         ax.set_title("Grade Distribution")
 
+        #Turns matplotlib figure into tkinter widget
         canvas = FigureCanvasTkAgg(fig, master = self.form)
         canvas.draw()
         canvas.get_tk_widget().grid(row = 4, column = 1, padx = 10, pady= 10)
@@ -584,9 +596,10 @@ class welcomeFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
-        ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 1, column = 2, columnspan=3, padx = 10, pady= 10)
-        ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 1, column = 5, columnspan=3, padx = 10, pady= 10)
+        ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 3, column = 2, columnspan=3, padx = 10, pady= 10)
+        ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 3, column = 5, columnspan=3, padx = 10, pady= 10)
 
-app = AppGui()
-app.mainloop()
+        full_sized_image = tk.PhotoImage(file = "UCMlogo.png")
+        self.ucm_logo = full_sized_image.subsample(x = 5, y = 5)
+        ttk.Label(self.form, image = self.ucm_logo).grid(row = 2, column = 4, columnspan = 2, padx = 10, pady = 10)
