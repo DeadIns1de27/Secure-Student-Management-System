@@ -330,6 +330,7 @@ class AdminFrame(BaseFrame):
         student = dh.load_student(enteredID)
         if student == None:
             messagebox.showerror("Error", "Student doesen't exist")
+            return None
 
         #Clears old data
         for widget in self.data_frame.winfo_children():
@@ -474,6 +475,7 @@ class VisualizationFrame(BaseFrame):
         #Checks if arr is empty
         if arr == None:
             messagebox.showerror("Error", "Class doesn't exist")
+            return None
 
         #Creates the histogram
         ax.hist(arr)
@@ -579,7 +581,10 @@ class welcomeFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
 
-        ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 0, column = 4, columnspan=2, padx = 10, pady = 10)
-        ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 1, column = 2, columnspan=3, padx = 10, pady= 10)
-        ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 1, column = 5, columnspan=3, padx = 10, pady= 10)
+        ttk.Label(self.form, text= "Welcome To UCM", font= LARGEFONT).grid(row = 1, column = 4, columnspan=2, padx = 10, pady = 10)
+        ttk.Button(self.form, text="Login", width=20, padding= (5, 10), command=lambda: self.controller.show_frame(LoginFrame)).grid(row = 3, column = 2, columnspan=3, padx = 10, pady= 10)
+        ttk.Button(self.form, text="Register", width= 20, padding= (5, 10), command=lambda: self.controller.show_frame(RegisterFrame)).grid(row = 3, column = 5, columnspan=3, padx = 10, pady= 10)
 
+        full_sized_image = tk.PhotoImage(file = "UCMlogo.png")
+        self.ucm_logo = full_sized_image.subsample(x = 5, y = 5)
+        ttk.Label(self.form, image = self.ucm_logo).grid(row = 2, column = 4, columnspan = 2, padx = 10, pady = 10)
